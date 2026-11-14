@@ -27,7 +27,7 @@ Open decisions: final stack, cost limits per service (free tiers vs. paid), who 
 | Backlog, planning, kanban/agile board | Linear, workspace "Elli Huynh", team key `ELL` |
 | Code review | GitHub pull requests, template in `.github/`, squash merge |
 | AI-assisted development | Claude Code with subagents (configuration in `CLAUDE.md` and `.claude/`) |
-| Security check | `/security-review` (Claude Code, general-purpose) and agent `security-reviewer` (knows our rules and the Linear issue) |
+| Security check | `/security-review` (Claude Code, general-purpose) and agent `code-reviewer` (knows our rules and the Linear issue) |
 
 Still to be defined by the team (tracked in Linear): linting and formatting, environment variables and secrets, CI and testing, secret scanning.
 
@@ -38,11 +38,11 @@ Still to be defined by the team (tracked in Linear): linting and formatting, env
 - Agents read Linear freely. Creating or editing issues only on request of a team member, and agents never set an issue to Done.
 
 ## Agents (`.claude/agents/`)
-| Agent | For | Purpose | Status |
-|-------|-----|---------|--------|
-| `product-owner` | Elli | Refine ideas into user stories with acceptance criteria | exists |
-| `security-reviewer` | Marvin | Review changes for backend/security and quality problems | exists |
-| UI/UX reviewer | Elli | Review UI changes for usability and design quality | planned |
-| QA/testing | Marvin | Test planning and QA checks | planned |
+| Agent | For | Purpose |
+|-------|-----|---------|
+| `product-owner` | Elli | Refine ideas into user stories with acceptance criteria |
+| `code-reviewer` | Marvin | Review changes for security, backend and rule problems |
+| `ui-ux-reviewer` | Elli | Review UI changes for usability, accessibility and consistency |
+| `qa-tester` | Marvin | Test plan and QA checklist from the acceptance criteria |
 
-Agents are read-only helpers, use a cheaper model (`sonnet`) and report in the findings format from `docs/RULES.md`. The final roster is defined in the subagents task in Linear; the table above is a starting point.
+Skills (`.claude/skills/`): `/start-task`, `/review-pr`, `/open-pr`. Details, permissions and limitations: `docs/AGENTS.md`.

@@ -17,6 +17,9 @@ Details on roles, workflow and quality gates: `docs/TEAM.md`.
 ## Project rules (apply to everyone, humans and agents)
 @docs/RULES.md
 
+## Agents and skills
+Agents live in `.claude/agents/`, skills in `.claude/skills/` (`/start-task`, `/review-pr`, `/open-pr`). You implement in the main session; subagents are read-only reviewers and planners. See `docs/AGENTS.md`.
+
 ## Agent essentials
 - Never work directly on `main`; always use a branch named per the rules above.
 - Only commit/push when a team member asks for it.

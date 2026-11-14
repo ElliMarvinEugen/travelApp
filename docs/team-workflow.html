@@ -478,6 +478,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
         <ul>
           <li>Owns <code>CLAUDE.md</code>, <code>.claude/</code> (agents, skills, settings) and the tool list.</li>
           <li>Decides which agents exist and what they may do.</li>
+          <li>Owns the technical architecture and the stack decision, drafted with the <strong>architect agent</strong> as an ADR.</li>
           <li>Keeps Linear and GitHub connected for Claude Code.</li>
         </ul>
       </div>
@@ -561,7 +562,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
       <div class="empty">–</div>
 
       <div class="who eugen last">Eugen<small>Agent Conductor</small></div>
-      <div class="last">Defines which agents exist and what they may do.</div>
+      <div class="last">Defines which agents exist and what they may do. <b>architect</b> drafts options and ADRs, Eugen decides on the architecture.</div>
       <div class="last">Can implement too. Keeps <code>CLAUDE.md</code> and agent files current.</div>
       <div class="human last"><b>Approves</b> the PR (or Elli does).</div>
       <div class="last empty">–</div>
@@ -593,12 +594,13 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
       <h3>Agents and skills at a glance</h3>
       <ul>
         <li><strong>product-owner</strong> (Elli): story and acceptance criteria</li>
+        <li><strong>architect</strong> (Eugen): stack and tool options, solution design, ADR drafts</li>
         <li><strong>code-reviewer</strong> (Marvin): security, backend, rules</li>
         <li><strong>ui-ux-reviewer</strong> (Elli): usability, accessibility, mobile</li>
         <li><strong>qa-tester</strong> (Marvin): test plan and QA checklist</li>
         <li><code>/start-task</code>, <code>/review-pr</code>, <code>/open-pr</code>: tie the steps together</li>
       </ul>
-      <p>All agents are read-only, run on a cheaper model and report in one findings format. Details in <code>docs/AGENTS.md</code>.</p>
+      <p>All agents are read-only. Reviewers and planners run on a cheaper model, the architect on a stronger one. Reviewers report in one findings format. Details in <code>docs/AGENTS.md</code>.</p>
     </div>
   </div>
 

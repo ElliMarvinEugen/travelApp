@@ -6,9 +6,9 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 
 | Person | GitHub | Role | Decides on |
 |--------|--------|------|------------|
-| **Elli** | [@elliHuynh](https://github.com/elliHuynh) | Product Owner & Lead Dev | What gets built (backlog, priorities, acceptance criteria) and how it is implemented technically (code structure) |
+| **Elli** | [@elliHuynh](https://github.com/elliHuynh) | Product Owner & Lead Dev | What gets built (backlog, priorities, acceptance criteria) and the business and functional side of every decision (scope, user-facing trade-offs, cost the product has to bear) |
 | **Marvin** | [@marvinvec](https://github.com/marvinvec) | Security & Quality Manager | Whether something is release-ready (security review, test strategy, quality gates, dependencies, secrets) |
-| **Eugen** | [@ekutschkin-priv](https://github.com/ekutschkin-priv) | **Agent Conductor** (Architect for Agents; "AI & Agent Engineer" in Linear) | How we work with agents (agent definitions, prompts, tooling, guardrails, system architecture) |
+| **Eugen** | [@ekutschkin-priv](https://github.com/ekutschkin-priv) | **Agent Conductor** (Architect for Agents; "AI & Agent Engineer" in Linear) | How we work with agents (agent definitions, prompts, tooling, guardrails) and the technical architecture (tech stack, tools, system design, interfaces) |
 
 > "Conductor": Eugen conducts the orchestra of humans and agents. The name is a proposal and easy to change (alternatives: Agent Whisperer, Maestro, Orchestrator).
 
@@ -18,12 +18,14 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 - Maintains the backlog (Linear) and writes/prioritizes user stories.
 - Defines acceptance criteria and gives the final acceptance of a finished feature (after Marvin's QA).
 - Leads the team: sets the direction and takes the lead when we sync.
-- Has the final say on everyday code architecture.
+- Makes the business and functional decisions in architecture discussions (scope, user-facing trade-offs, cost limits the product has to bear). Technical architecture is Eugen's call; Elli's input comes first on anything that affects scope, UX or cost.
+- Implements features within the agreed architecture.
 - Can approve and merge pull requests.
-- Uses agents: `product-owner` (refine stories) and `ui-ux-reviewer`, plus Claude Code for implementation.
+- Uses agents: `product-owner` (refine stories) and `ui-ux-reviewer`, plus Claude Code for implementation. Reads `architect` proposals for functional and cost impact.
 
 ### Marvin, Security & Quality Manager
 - Reviews pull requests for security and quality (see quality gates below).
+- Reviews the security aspects of every architecture decision record (auth, user data, secrets, dependencies) before it is accepted.
 - Owns the test strategy, CI checks, dependency and secret hygiene.
 - **Leads QA:** tests every feature in "Ready for QA" against its acceptance criteria and confirms it before it becomes Done.
 - Can block a release (veto on security findings).
@@ -32,7 +34,9 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 ### Eugen, Agent Conductor
 - Owns `CLAUDE.md`, `.claude/` (agents, skills, settings, hooks) and `docs/TOOLS.md`.
 - Decides which agents exist, what they may do and how they work together.
-- Responsible for the overall system architecture and interfaces.
+- **Owns the technical architecture:** tech stack and tool choices, system design, module boundaries and interfaces. Records decisions as ADRs in `docs/adr/` (see `docs/adr/README.md`).
+- Takes Elli's business and functional input and Marvin's security review into account before accepting an ADR. Cost-driven choices that limit the product are agreed with Elli.
+- Uses the `architect` agent to evaluate options and draft ADRs. The agent only suggests, Eugen decides.
 - Can approve and merge pull requests.
 - Makes sure agents work traceably (small PRs, clear commits, no access to secrets).
 

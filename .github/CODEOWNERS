@@ -1,0 +1,10 @@
+# Default: Elli or Eugen review everything
+*                    @elliHuynh @ekutschkin-priv
+
+# Agent setup and tooling docs are owned by Eugen
+/CLAUDE.md           @ekutschkin-priv
+/.claude/            @ekutschkin-priv
+/docs/TOOLS.md       @ekutschkin-priv
+
+# Security-sensitive areas also need Marvin
+/.github/            @ekutschkin-priv @marvinvec

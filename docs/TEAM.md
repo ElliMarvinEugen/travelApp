@@ -16,7 +16,8 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 
 ### Elli, Product Owner & Lead Dev
 - Maintains the backlog (Linear) and writes/prioritizes user stories.
-- Defines acceptance criteria and accepts finished features.
+- Defines acceptance criteria and gives the final acceptance of a finished feature (after Marvin's QA).
+- Leads the team: sets the direction and takes the lead when we sync.
 - Has the final say on everyday code architecture.
 - Can approve and merge pull requests.
 - Uses agent: `product-owner` (refine stories) and Claude Code for implementation.
@@ -24,6 +25,7 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 ### Marvin, Security & Quality Manager
 - Reviews pull requests for security and quality (see quality gates below).
 - Owns the test strategy, CI checks, dependency and secret hygiene.
+- **Leads QA:** tests every feature in "Ready for QA" against its acceptance criteria and confirms it before it becomes Done.
 - Can block a release (veto on security findings).
 - Uses agent: `security-reviewer` and `/security-review`.
 
@@ -41,7 +43,12 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 3. **Pull request** using the template. No direct pushes to `main`.
 4. **Review:** every PR needs approval from **Elli or Eugen**. Marvin reviews security and quality and can veto.
 5. **Merge** via **squash merge**.
-6. **QA and release approval** as defined in the Definition of Done in Linear (acceptance criteria met, reviewed, tests pass, no critical bugs, QA done, docs updated, approved for release).
+6. **QA and acceptance:** Marvin leads QA, Elli gives the final acceptance. The Definition of Done in Linear applies (acceptance criteria met, reviewed, tests pass, no critical bugs, QA done, docs updated, approved for release).
+
+## Syncing
+This is a hobby project, so there is no fixed meeting schedule. We sync ad hoc or when there is time, and Elli takes the lead. Day to day, the Linear board, open PRs and `main` show everyone what happened.
+
+A visual guide to the whole workflow, including agents: [team-workflow.html](team-workflow.html) (open it in a browser after cloning).
 
 Linear's target workflow statuses are Backlog, Ready, In Progress, Code Review, Ready for QA, Done (being set up in ELL-14). The branching and PR strategy is being finalized by Marvin in ELL-16; this section is the interim rule and gets aligned with that outcome.
 

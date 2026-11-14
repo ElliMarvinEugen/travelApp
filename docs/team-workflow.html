@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Workflow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: one scrolling guide. Three places (Linear, GitHub, local), one task lifecycle, a day per person, then the agent swimlane. Each person has a fixed color across the whole page. */
+:root {
+  --bg: #f2f5f8;
+  --surface: #ffffff;
+  --surface2: #e8edf2;
+  --fg: #15202b;
+  --muted: #566573;
+  --line: #d3dbe3;
+  --elli: #c23a52;
+  --marvin: #0b7476;
+  --eugen: #3b5bdb;
+  --agent: #9a6212;
+  --linear: #5e6ad2;
+  --github: #24292f;
+  --ok: #2b8a3e;
+  --code-bg: #101820;
+  --code-fg: #d7e2ec;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e141a; --surface: #161f28; --surface2: #1e2935; --fg: #e6edf4; --muted: #9aa9b8; --line: #2a3745;
+    --elli: #ff8197; --marvin: #4fd1d3; --eugen: #8da2ff; --agent: #f0b455; --linear: #98a1ff; --github: #c9d1d9; --ok: #69db7c;
+    --code-bg: #0a0f14; --code-fg: #d7e2ec;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e141a; --surface: #161f28; --surface2: #1e2935; --fg: #e6edf4; --muted: #9aa9b8; --line: #2a3745;
+  --elli: #ff8197; --marvin: #4fd1d3; --eugen: #8da2ff; --agent: #f0b455; --linear: #98a1ff; --github: #c9d1d9; --ok: #69db7c;
+  --code-bg: #0a0f14; --code-fg: #d7e2ec;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+a { color: inherit; }
+
+/* nav */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.nav-inner { max-width: 1080px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; }
+.nav a {
+  white-space: nowrap; text-decoration: none; font-size: 0.9rem; font-weight: 500; color: var(--muted);
+  padding: 6px 12px; border-radius: 999px;
+}
+.nav a:hover, .nav a:focus-visible { color: var(--fg); background: var(--surface2); outline: none; }
+
+/* hero */
+.hero { padding-block: 56px 40px; display: grid; gap: 20px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lead { font-size: 1.2rem; max-width: 62ch; color: var(--muted); }
+.lead strong { color: var(--fg); font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+
+section { padding-block: 44px; border-top: 1px solid var(--line); display: grid; gap: 24px; }
+section > .intro { max-width: 66ch; color: var(--muted); }
+
+/* chips */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; line-height: 1;
+  padding: 6px 10px; border-radius: 999px;
+  color: var(--c); background: color-mix(in srgb, var(--c) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+}
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.chip.plain::before { display: none; }
+.elli { --c: var(--elli); } .marvin { --c: var(--marvin); } .eugen { --c: var(--eugen); } .agent { --c: var(--agent); }
+.linear { --c: var(--linear); } .github { --c: var(--github); } .local { --c: var(--muted); }
+.status {
+  font-family: var(--font-mono); font-size: 0.74rem; padding: 4px 8px; border-radius: 6px;
+  background: var(--surface2); color: var(--fg); border: 1px solid var(--line);
+}
+
+/* three places */
+.places { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.place { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 10px; padding: 20px; display: grid; gap: 10px; align-content: start; }
+.place .q { font-family: var(--font-mono); font-size: 0.8rem; color: var(--c); font-weight: 500; }
+.place ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 0.95rem; }
+.glue { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 16px 20px; display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; }
+.glue p { color: var(--muted); font-size: 0.95rem; flex: 1 1 320px; }
+
+/* statuses flow */
+.flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.flow .arrow { color: var(--muted); }
+
+/* steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 44px 1fr; gap: 16px; padding-bottom: 24px; position: relative; counter-increment: s; }
+.steps li::before {
+  content: counter(s); font-family: var(--font-display); font-weight: 700; font-size: 1.05rem;
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--fg); color: var(--bg); position: relative; z-index: 1;
+}
+.steps li:not(:last-child)::after { content: ""; position: absolute; left: 17px; top: 36px; bottom: 0; width: 2px; background: var(--line); }
+.step-body { display: grid; gap: 8px; padding-top: 2px; }
+.step-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.step-body p { color: var(--muted); max-width: 70ch; }
+.step-body p strong { color: var(--fg); font-weight: 600; }
+
+/* code */
+.cmd { display: flex; align-items: stretch; background: var(--code-bg); border-radius: 8px; overflow: hidden; }
+.cmd code { flex: 1; min-width: 0; padding: 10px 14px; color: var(--code-fg); overflow-x: auto; white-space: pre; }
+.cmd button {
+  border: 0; border-left: 1px solid rgba(255,255,255,0.12); background: transparent; color: var(--code-fg);
+  font: 500 0.78rem var(--font-body); padding: 0 14px; cursor: pointer;
+}
+.cmd button:hover, .cmd button:focus-visible { background: rgba(255,255,255,0.1); outline: none; }
+
+/* checklist */
+.setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.card h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.card p, .card li { color: var(--muted); font-size: 0.95rem; }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.card li strong { color: var(--fg); font-weight: 600; }
+.note { background: color-mix(in srgb, var(--agent) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--agent) 30%, transparent); border-radius: 10px; padding: 14px 18px; font-size: 0.95rem; color: var(--fg); }
+.note b { color: var(--agent); }
+
+/* person columns */
+.people { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+.person { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 10px; padding: 20px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.person .role { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
+.when { font-family: var(--font-mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c); font-weight: 500; }
+.person ul { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 5px; font-size: 0.95rem; color: var(--muted); }
+.person li strong { color: var(--fg); font-weight: 600; }
+.person .block { display: grid; gap: 2px; }
+.person .now { font-size: 0.88rem; background: var(--surface2); border-radius: 8px; padding: 10px 12px; color: var(--muted); }
+.person .now b { color: var(--fg); }
+
+/* swimlane */
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.lanes { display: grid; grid-template-columns: 120px repeat(5, minmax(170px, 1fr)); min-width: 960px; }
+.lanes > div { padding: 12px; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); font-size: 0.88rem; color: var(--muted); }
+.lanes > div:nth-child(6n) { border-right: 0; }
+.lanes > .last { border-bottom: 0; }
+.lanes .ph { font-family: var(--font-display); font-weight: 700; font-size: 0.98rem; color: var(--fg); background: var(--surface2); display: grid; gap: 2px; align-content: center; }
+.lanes .ph small { font-family: var(--font-mono); font-weight: 400; font-size: 0.72rem; color: var(--muted); }
+.lanes .who { background: color-mix(in srgb, var(--c) 9%, var(--surface)); border-left: 4px solid var(--c); color: var(--c); font-weight: 600; font-size: 0.9rem; display: grid; align-content: center; }
+.lanes .who small { display: block; color: var(--muted); font-weight: 400; font-size: 0.76rem; }
+.lanes .empty { color: var(--line); display: grid; place-items: center; }
+.lanes .human { box-shadow: inset 3px 0 0 var(--ok); }
+.lanes b { color: var(--fg); font-weight: 600; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 0.88rem; color: var(--muted); align-items: center; }
+.keyrow i { display: inline-block; width: 4px; height: 16px; background: var(--ok); border-radius: 2px; vertical-align: -3px; margin-right: 8px; }
+
+/* sync */
+.sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.rhythm { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.pill { font-size: 0.74rem; font-weight: 600; font-family: var(--font-mono); padding: 3px 8px; border-radius: 6px; background: color-mix(in srgb, var(--agent) 16%, var(--surface)); color: var(--agent); }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.rules > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; font-size: 0.94rem; color: var(--muted); }
+.rules strong { color: var(--fg); font-weight: 600; display: block; margin-bottom: 2px; }
+.prompts { display: grid; gap: 10px; }
+.prompt { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.prompt span.t { font-size: 0.95rem; color: var(--fg); }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px 56px; color: var(--muted); font-size: 0.88rem; }
+
+@media (max-width: 560px) {
+  .hero { padding-block: 36px 24px; }
+  .steps li { grid-template-columns: 36px 1fr; gap: 12px; }
+  .prompt { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+:focus-visible { outline: 2px solid var(--eugen); outline-offset: 2px; }
+</style>
+
+</head>
+<body>
+<nav class="nav" aria-label="Sections">
+  <div class="nav-inner">
+    <a href="#picture">Big picture</a>
+    <a href="#task">Life of a task</a>
+    <a href="#setup">Your setup</a>
+    <a href="#daily">A day for each of us</a>
+    <a href="#sync">Meeting up</a>
+    <a href="#agents">With agents</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">travelApp · team guide</div>
+  <h1>How the three of us work together</h1>
+  <p class="lead"><strong>Linear holds the plan, GitHub holds the code,</strong> and each of us runs Claude Code on our own machine to connect the two. Everything we do ends up in one of those places, so everyone sees the same state.</p>
+  <div class="legend" aria-label="Colors used on this page">
+    <span class="chip elli">Elli · Product Owner &amp; Lead Dev</span>
+    <span class="chip marvin">Marvin · Security &amp; Quality</span>
+    <span class="chip eugen">Eugen · Agent Conductor</span>
+    <span class="chip agent">Claude agents</span>
+  </div>
+</header>
+
+<section id="picture">
+  <h2>The big picture: three places</h2>
+  <p class="intro">Nobody works "in the project" directly. Each person works on their own computer and publishes to the two shared places. Linear says <em>what and who</em>, GitHub says <em>what changed</em>.</p>
+  <div class="places">
+    <div class="place linear">
+      <span class="chip linear plain">Linear</span>
+      <h3>The plan</h3>
+      <p class="q">workspace "Elli Huynh" · team key ELL</p>
+      <ul>
+        <li>Backlog, user stories, acceptance criteria</li>
+        <li>Who works on what, and in which status</li>
+        <li>Milestones and the Definition of Done</li>
+      </ul>
+      <p class="mono" style="font-size:.78rem;color:var(--muted)">Leading for product scope.</p>
+    </div>
+    <div class="place github">
+      <span class="chip github plain">GitHub</span>
+      <h3>The code</h3>
+      <p class="q">ekutschkin-priv/travelApp (private)</p>
+      <ul>
+        <li><code>main</code> is the shared, reviewed truth</li>
+        <li>Branches and pull requests for every change</li>
+        <li>Reviews, approvals, squash merges</li>
+      </ul>
+      <p class="mono" style="font-size:.78rem;color:var(--muted)">Nobody pushes to main directly.</p>
+    </div>
+    <div class="place local">
+      <span class="chip local plain">Your computer</span>
+      <h3>Your workbench</h3>
+      <p class="q">local clone + your own Claude Code</p>
+      <ul>
+        <li>Your copy of the repo, your branches</li>
+        <li>Your Claude Code reads the repo rules and Linear</li>
+        <li>Agents run here, inside your session</li>
+      </ul>
+      <p class="mono" style="font-size:.78rem;color:var(--muted)">Private until you push.</p>
+    </div>
+  </div>
+  <div class="glue">
+    <span class="chip plain" style="--c:var(--fg)">What connects them</span>
+    <p><b>git push / pull</b> moves code between your computer and GitHub. The <b>Linear connector</b> lets your Claude Code read (and, when you ask, update) Linear. Putting <code>ELL-10</code> in the branch name and PR title links GitHub and Linear.</p>
+  </div>
+  <div>
+    <h3 style="margin-bottom:10px">Linear status of a task (target)</h3>
+    <div class="flow">
+      <span class="status">Backlog</span><span class="arrow">→</span>
+      <span class="status">Ready</span><span class="arrow">→</span>
+      <span class="status">In Progress</span><span class="arrow">→</span>
+      <span class="status">Code Review</span><span class="arrow">→</span>
+      <span class="status">Ready for QA</span><span class="arrow">→</span>
+      <span class="status">Done</span>
+    </div>
+    <p style="color:var(--muted);font-size:.88rem;margin-top:8px">Still open: Elli sets these statuses up in Linear (ELL-14). Until then the board only has Backlog, Todo, In Progress, Done.</p>
+  </div>
+</section>
+
+<section id="task">
+  <h2>Life of one task, from idea to main</h2>
+  <p class="intro">This is the same path for everyone and for agents. Example: ELL-10 "Invite Travelers".</p>
+  <ol class="steps">
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip elli">Elli</span><span class="chip linear plain">Linear</span><span class="status">Backlog → Ready</span></div>
+        <h3>The story is written and ready</h3>
+        <p>Elli turns an idea into a <strong>user story with acceptance criteria</strong> and puts it in a milestone. When it is clear enough to build, she moves it to <strong>Ready</strong>. Nothing is started before this.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip plain" style="--c:var(--fg)">Whoever picks it up</span><span class="chip linear plain">Linear</span><span class="chip local plain">Local</span><span class="status">Ready → In Progress</span></div>
+        <h3>Pick it up and start a branch</h3>
+        <p>Assign it to yourself in Linear, then get the latest <code>main</code> and create a branch that carries the issue ID.</p>
+        <div class="cmd"><code>git switch main &amp;&amp; git pull
+git switch -c feat/ELL-10-invite-travelers</code><button type="button" data-copy="git switch main && git pull&#10;git switch -c feat/ELL-10-invite-travelers">Copy</button></div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip plain" style="--c:var(--fg)">You + your Claude Code</span><span class="chip local plain">Local</span></div>
+        <h3>Build it with your Claude Code</h3>
+        <p>Your Claude Code reads the issue from Linear, follows <code>CLAUDE.md</code> and <code>docs/RULES.md</code> (English, sensible comments, naming) and writes code and tests. Small commits, and only when you tell it to commit.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip plain" style="--c:var(--fg)">You</span><span class="chip github plain">GitHub</span><span class="status">In Progress → Code Review</span></div>
+        <h3>Push and open a pull request</h3>
+        <p>The PR title contains the issue ID, so Linear links it. The template asks for what changed and why.</p>
+        <div class="cmd"><code>git push -u origin feat/ELL-10-invite-travelers
+gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-10-invite-travelers&#10;gh pr create">Copy</button></div>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip marvin">Marvin</span><span class="chip agent">security-reviewer</span><span class="chip github plain">GitHub</span></div>
+        <h3>Security and quality review</h3>
+        <p>Marvin runs the <strong>security-reviewer</strong> agent on the branch and reviews the findings. Secrets, input validation, user data, new dependencies, tests. Marvin can <strong>veto</strong> a release over security findings.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip elli">Elli</span><span class="chip eugen">Eugen</span><span class="chip github plain">GitHub</span><span class="status">Code Review → Ready for QA</span></div>
+        <h3>Approval and squash merge</h3>
+        <p>Every PR needs approval from <strong>Elli or Eugen</strong>. Then it is merged with <strong>squash</strong> into <code>main</code>. One PR becomes one clean commit.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip marvin">Marvin</span><span class="chip elli">Elli</span><span class="chip linear plain">Linear</span><span class="status">Ready for QA → Done</span></div>
+        <h3>QA and Definition of Done</h3>
+        <p>The feature is tested against its acceptance criteria. Done means: criteria met, reviewed, tests pass, no critical bugs, QA complete, docs updated, approved for release. Marvin leads QA, Elli gives the final acceptance.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-body">
+        <div class="step-head"><span class="chip plain" style="--c:var(--fg)">Everyone</span><span class="chip local plain">Local</span></div>
+        <h3>Everyone gets the new state</h3>
+        <p>On the next start of work, each person pulls <code>main</code>. Their Claude Code now knows the new code, and Linear shows the task as Done.</p>
+        <div class="cmd"><code>git switch main &amp;&amp; git pull</code><button type="button" data-copy="git switch main && git pull">Copy</button></div>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section id="setup">
+  <h2>Your setup, once per person</h2>
+  <p class="intro">Each of us does this one time. Afterwards, working on the project means opening your clone in Claude Code.</p>
+  <div class="setup">
+    <div class="card">
+      <h3>1 · Get access</h3>
+      <ul>
+        <li><strong>Repo access:</strong> all three of us are already collaborators on the private repo.</li>
+        <li><strong>Linear:</strong> all three of us are already members of the workspace.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>2 · Install the tools</h3>
+      <ul>
+        <li>Git, the GitHub CLI and the Claude desktop app (Code tab).</li>
+      </ul>
+      <p>Windows:</p>
+      <div class="cmd"><code>winget install GitHub.cli</code><button type="button" data-copy="winget install GitHub.cli">Copy</button></div>
+      <p>macOS:</p>
+      <div class="cmd"><code>brew install gh</code><button type="button" data-copy="brew install gh">Copy</button></div>
+    </div>
+    <div class="card">
+      <h3>3 · Sign in to GitHub</h3>
+      <p>The CLI shows a one-time code. You enter it in the browser while logged in to your own GitHub account.</p>
+      <div class="cmd"><code>gh auth login --web --git-protocol https</code><button type="button" data-copy="gh auth login --web --git-protocol https">Copy</button></div>
+    </div>
+    <div class="card">
+      <h3>4 · Clone the repo</h3>
+      <div class="cmd"><code>git clone https://github.com/ekutschkin-priv/travelApp.git</code><button type="button" data-copy="git clone https://github.com/ekutschkin-priv/travelApp.git">Copy</button></div>
+      <p>Open this folder as the project in Claude Code. It loads <code>CLAUDE.md</code> and the shared rules by itself.</p>
+    </div>
+    <div class="card">
+      <h3>5 · Connect Linear</h3>
+      <p>The repo contains the Linear connection (<code>.mcp.json</code>). Sign in to Linear once when Claude asks, or add the connector under Settings → Connectors.</p>
+      <p>Check: ask your Claude "Which Linear issues are assigned to me?"</p>
+    </div>
+  </div>
+  <div class="note"><b>Good to know:</b> Everybody signs in with their own account. Never share tokens or passwords, and never put them in the repo. Each Claude Code session only sees what its person may see.</div>
+</section>
+
+<section id="daily">
+  <h2>A day for each of us</h2>
+  <p class="intro">The rhythm is the same for everyone: look at Linear, pull the latest code, work on a branch, hand over via pull request.</p>
+  <div class="people">
+
+    <div class="person elli">
+      <div>
+        <span class="chip elli">Elli</span>
+        <div class="role">Product Owner &amp; Lead Dev</div>
+      </div>
+      <div class="block">
+        <span class="when">Start</span>
+        <ul>
+          <li>Check the Linear board and open PRs.</li>
+          <li><code>git pull</code> on <code>main</code>.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <span class="when">As Product Owner</span>
+        <ul>
+          <li><strong>Maintains the backlog</strong> and priorities in Linear.</li>
+          <li>Refines ideas into stories with the <strong>product-owner agent</strong>, moves them to Ready.</li>
+          <li>Gives the final acceptance of a finished feature, after Marvin's QA.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <span class="when">As Lead Dev</span>
+        <ul>
+          <li>Builds features on a branch with her Claude Code.</li>
+          <li><strong>Approves and merges</strong> PRs (squash).</li>
+        </ul>
+      </div>
+      <div class="now"><b>Right now:</b> ELL-13 scope &amp; MVP, ELL-14 Linear workflow, ELL-17 app setup.</div>
+    </div>
+
+    <div class="person marvin">
+      <div>
+        <span class="chip marvin">Marvin</span>
+        <div class="role">Security &amp; Quality Manager</div>
+      </div>
+      <div class="block">
+        <span class="when">Start</span>
+        <ul>
+          <li>Check open PRs and the "Ready for QA" column.</li>
+          <li><code>git pull</code> on <code>main</code>.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <span class="when">Review</span>
+        <ul>
+          <li>Runs the <strong>security-reviewer</strong> agent on every PR branch and judges the findings.</li>
+          <li>Checks the rules: English, comments, naming, no secrets, justified dependencies.</li>
+          <li>Can <strong>veto</strong> over security findings.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <span class="when">Quality</span>
+        <ul>
+          <li>Owns test strategy, CI checks and the quality gates.</li>
+          <li><strong>Leads QA</strong> before a task becomes Done.</li>
+        </ul>
+      </div>
+      <div class="now"><b>Right now:</b> ELL-16 Git &amp; PR strategy, ELL-18 ESLint/Prettier, ELL-19 secrets.</div>
+    </div>
+
+    <div class="person eugen">
+      <div>
+        <span class="chip eugen">Eugen</span>
+        <div class="role">Agent Conductor · AI &amp; Agent Engineer</div>
+      </div>
+      <div class="block">
+        <span class="when">Start</span>
+        <ul>
+          <li>Check Linear and open PRs.</li>
+          <li><code>git pull</code> on <code>main</code>.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <span class="when">Agents &amp; tooling</span>
+        <ul>
+          <li>Owns <code>CLAUDE.md</code>, <code>.claude/</code> (agents, skills, settings) and the tool list.</li>
+          <li>Decides which agents exist and what they may do.</li>
+          <li>Keeps Linear and GitHub connected for Claude Code.</li>
+        </ul>
+      </div>
+      <div class="block">
+        <span class="when">Delivery</span>
+        <ul>
+          <li><strong>Approves</strong> PRs next to Elli.</li>
+          <li>Repository admin: access, settings, rulesets.</li>
+        </ul>
+      </div>
+      <div class="now"><b>Right now:</b> ELL-15 repo, ELL-21 CLAUDE.md, ELL-23 GitHub tools, ELL-24 subagents.</div>
+    </div>
+
+  </div>
+</section>
+
+<section id="sync">
+  <h2>Meeting up: how everyone sees what happened</h2>
+  <p class="intro">We do not need a status report from each person. The state is already written down in three places. Everybody reads the same ones.</p>
+  <div class="sources">
+    <div class="card">
+      <span class="chip linear plain">Linear board</span>
+      <h3>What is going on</h3>
+      <p>Status of every task, who owns it, which milestone it belongs to. Comments hold decisions and questions.</p>
+    </div>
+    <div class="card">
+      <span class="chip github plain">GitHub PRs and main</span>
+      <h3>What changed</h3>
+      <p>Open PRs show work in progress. The history of <code>main</code> shows one squashed commit per finished change.</p>
+    </div>
+    <div class="card">
+      <span class="chip local plain">Your Claude Code</span>
+      <h3>The summary on demand</h3>
+      <p>After a <code>git pull</code>, ask your Claude to catch you up. It reads the git log and Linear for you.</p>
+    </div>
+  </div>
+  <div class="prompts">
+    <div class="prompt"><span class="chip plain" style="--c:var(--fg)">Ask your Claude</span><span class="t">"Summarize what changed on main since I last pulled, and which Linear issues moved."</span></div>
+  </div>
+  <div>
+    <h3 style="margin-bottom:12px">When we sync</h3>
+    <div class="rhythm">
+      <div class="card"><h3>No fixed schedule</h3><p>This is a hobby project. We meet ad hoc or whenever there is time, and <strong>Elli takes the lead</strong>: look at <code>main</code> together, walk the board, decide what moves to Ready next.</p></div>
+      <div class="card"><h3>In between</h3><p>Look at the board and open PRs when you start working, and <code>git pull</code>. Questions and blockers go into a Linear comment or the team chat.</p></div>
+      <div class="card"><h3>When the rules need a change</h3><p>Open a PR on <code>docs/RULES.md</code> or <code>CLAUDE.md</code>. It is reviewed like code, and after the merge every Claude Code follows the new rule.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="agents">
+  <h2>With agents: from story to main</h2>
+  <p class="intro">Agents are helpers inside a person's Claude Code session. They do the legwork in each phase, and a human decides at every gate. Green bar means a human decision.</p>
+  <div class="scroll" role="region" aria-label="Swimlane diagram of the agent workflow" tabindex="0">
+    <div class="lanes">
+      <div class="ph" style="--c:var(--fg)">Who<small>&nbsp;</small></div>
+      <div class="ph">1 Refine<small>Linear</small></div>
+      <div class="ph">2 Implement<small>local + branch</small></div>
+      <div class="ph">3 Review<small>GitHub PR</small></div>
+      <div class="ph">4 Merge &amp; QA<small>main</small></div>
+      <div class="ph">5 Share<small>everyone</small></div>
+
+      <div class="who elli">Elli<small>PO &amp; Lead Dev</small></div>
+      <div class="human"><b>Brings the idea.</b> Reads the agent's draft, decides scope and priority, moves it to <b>Ready</b>.</div>
+      <div>Can build it herself with her Claude Code.</div>
+      <div class="human"><b>Approves</b> the PR (or Eugen does).</div>
+      <div class="human"><b>Squash merges</b>, accepts the feature.</div>
+      <div>Sees the board and <code>main</code> move.</div>
+
+      <div class="who agent">Agents<small>inside a session</small></div>
+      <div><b>product-owner</b> drafts story, acceptance criteria, open questions. It only suggests.</div>
+      <div>The session <b>reads the issue</b> in Linear, creates the branch, writes code and tests under <code>RULES.md</code>.</div>
+      <div><b>security-reviewer</b> checks the diff. Planned: UI/UX and QA agents (ELL-24).</div>
+      <div class="empty">–</div>
+      <div>Next session: after <code>git pull</code> the agent knows the new code.</div>
+
+      <div class="who marvin">Marvin<small>Security &amp; Quality</small></div>
+      <div class="empty">–</div>
+      <div class="empty">–</div>
+      <div class="human"><b>Judges the findings</b>, reviews, can veto.</div>
+      <div class="human"><b>QA</b> against the acceptance criteria, confirms Done.</div>
+      <div class="empty">–</div>
+
+      <div class="who eugen last">Eugen<small>Agent Conductor</small></div>
+      <div class="last">Defines which agents exist and what they may do.</div>
+      <div class="last">Can implement too. Keeps <code>CLAUDE.md</code> and agent files current.</div>
+      <div class="human last"><b>Approves</b> the PR (or Elli does).</div>
+      <div class="last empty">–</div>
+      <div class="last empty">–</div>
+    </div>
+  </div>
+  <div class="keyrow"><span><i></i>A human decides here</span><span>Scroll sideways on a small screen</span></div>
+
+  <div class="setup">
+    <div class="card">
+      <h3>How a story reaches an agent</h3>
+      <ul>
+        <li>A story with acceptance criteria sits in <strong>Ready</strong> in Linear.</li>
+        <li>A person tells their Claude Code which one to build.</li>
+        <li>The session reads the issue through the Linear connector and works on a new branch.</li>
+        <li>It stops at the PR. Humans take it from there.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>How it becomes visible to all</h3>
+      <ul>
+        <li>The <strong>PR</strong> shows the change to everyone on GitHub.</li>
+        <li>After the merge it is part of <strong>main</strong>.</li>
+        <li>Linear shows the new status and the linked PR.</li>
+        <li>Everybody's next <code>git pull</code> brings it to their machine.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div>
+    <h3 style="margin-bottom:12px">Example prompts</h3>
+    <div class="prompts">
+      <div class="prompt"><span class="chip elli">Elli</span><span class="t">"Use the product-owner agent to refine this idea into a story: friends should be able to split costs on a trip."</span></div>
+      <div class="prompt"><span class="chip eugen">Eugen</span><span class="t">"Read ELL-10 in Linear and implement it on a new branch. Follow the project rules. Do not commit yet."</span></div>
+      <div class="prompt"><span class="chip marvin">Marvin</span><span class="t">"Run the security-reviewer agent on the changes of branch feat/ELL-10-invite-travelers and summarize the findings."</span></div>
+    </div>
+  </div>
+
+  <div>
+    <h3 style="margin-bottom:12px">Ground rules for every agent</h3>
+    <div class="rules">
+      <div><strong>Never on main</strong>Agents work on a branch and hand over through a PR.</div>
+      <div><strong>Commit and push on request</strong>Only when a team member asks for it.</div>
+      <div><strong>Linear: read freely, write on request</strong>Creating or changing issues only when a person asks.</div>
+      <div><strong>No secrets</strong>Agents never read, write or print tokens, passwords or <code>.env</code> files.</div>
+      <div><strong>Ask when unsure</strong>Decisions belong to the role. Agents do not choose stack or paid services.</div>
+      <div><strong>Same rules as humans</strong>English, useful comments, naming convention.</div>
+    </div>
+  </div>
+
+  <div class="note"><b>Today's limit:</b> agents run only while a person has a Claude Code session open. They do not watch Linear on their own and do not start work by themselves. Automation such as a bot that picks up Ready issues is a later step, and Eugen decides it with the team.</div>
+</section>
+
+<footer>
+  Sources: <code>docs/TEAM.md</code>, <code>docs/RULES.md</code>, <code>docs/TOOLS.md</code> in the repo, and the Linear project "Travel Planner App". Where Linear and this page differ, Linear wins. The maintained copy of this guide is <code>docs/team-workflow.html</code> in the repo.
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.cmd button').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var text = btn.getAttribute('data-copy');
+    var code = btn.parentElement.querySelector('code');
+    function done() { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); }
+    function fallback() {
+      var range = document.createRange(); range.selectNodeContents(code);
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      btn.textContent = 'Selected'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+    }
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+});
+</script>
+</body>
+</html>

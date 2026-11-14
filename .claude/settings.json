@@ -26,5 +26,6 @@
       "mcp__linear-server__save_issue",
       "mcp__linear-server__save_comment"
     ]
-  }
+  },
+  "enabledMcpjsonServers": ["linear-server"]
 }

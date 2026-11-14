@@ -12,7 +12,7 @@ Owner: Eugen (Agent Conductor). Everything here lives in `.claude/` and is versi
 - **Cost:** agents run only on request, with a cheaper model (`sonnet`).
 
 ## Prerequisites (once per person)
-- **Linear:** approve the project's `linear-server` (from `.mcp.json`) when Claude Code asks, then sign in with `/mcp`. Do not keep a second Linear connector enabled for this project, because agent tool names are `mcp__linear-server__*`.
+- **Linear:** the project's `linear-server` (from `.mcp.json`) is enabled for everyone through `.claude/settings.json` (`enabledMcpjsonServers`). Open a new session in the project folder and sign in with your own Linear account (`/mcp`, or the connector view of the app). Do not keep a second Linear connector enabled for this project, because agent tool names are `mcp__linear-server__*`. Adding another MCP server to `.mcp.json` needs a reviewed PR and its own entry in `enabledMcpjsonServers`.
 - **GitHub CLI:** install `gh` and run `gh auth login --web --git-protocol https`. Restart the app (or terminal) after installing so `gh` is on the PATH. Needed for `/open-pr`.
 - **Check:** ask your Claude "Which Linear issues are assigned to me?" and run `gh auth status`.
 

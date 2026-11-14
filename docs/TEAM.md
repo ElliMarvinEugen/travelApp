@@ -16,7 +16,8 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 
 ### Elli, Product Owner & Lead Dev
 - Maintains the backlog (Linear) and writes/prioritizes user stories.
-- Defines acceptance criteria and accepts finished features.
+- Defines acceptance criteria and gives the final acceptance of a finished feature (after Marvin's QA).
+- Leads the team: sets the direction and takes the lead when we sync.
 - Has the final say on everyday code architecture.
 - Can approve and merge pull requests.
 - Uses agent: `product-owner` (refine stories) and Claude Code for implementation.
@@ -24,6 +25,7 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 ### Marvin, Security & Quality Manager
 - Reviews pull requests for security and quality (see quality gates below).
 - Owns the test strategy, CI checks, dependency and secret hygiene.
+- **Leads QA:** tests every feature in "Ready for QA" against its acceptance criteria and confirms it before it becomes Done.
 - Can block a release (veto on security findings).
 - Uses agent: `security-reviewer` and `/security-review`.
 
@@ -37,13 +39,50 @@ We are three people. Each role has clear decision authority. Agents (Claude Code
 ## Workflow
 
 1. **Idea → Linear issue** (Elli), as a user story with acceptance criteria, assigned to a milestone.
-2. **Implementation** on a feature branch (`feat/ELL-12-…`, `fix/ELL-12-…`, `chore/ELL-12-…`), by a human or an agent.
-3. **Pull request** using the template. No direct pushes to `main`.
-4. **Review:** every PR needs approval from **Elli or Eugen**. Marvin reviews security and quality and can veto.
-5. **Merge** via **squash merge**.
-6. **QA and release approval** as defined in the Definition of Done in Linear (acceptance criteria met, reviewed, tests pass, no critical bugs, QA done, docs updated, approved for release).
+2. **Implementation** on a branch named per `docs/RULES.md` (e.g. `feat/ELL-12-trip-list`), by a human or an agent.
+3. **Pull request** using the template, with the Linear ID in the title. No direct pushes to `main`.
+4. **Review and merge** as described below.
+5. **QA and acceptance:** Marvin leads QA, Elli gives the final acceptance. The Definition of Done in Linear applies (acceptance criteria met, reviewed, tests pass, no critical bugs, QA done, docs updated, approved for release).
 
-Linear's target workflow statuses are Backlog, Ready, In Progress, Code Review, Ready for QA, Done (being set up in ELL-14). The branching and PR strategy is being finalized by Marvin in ELL-16; this section is the interim rule and gets aligned with that outcome.
+### Review and merge
+1. The **author** opens the PR and moves the Linear issue to Code Review.
+2. **Marvin** is requested as reviewer on every PR, runs the `security-reviewer` agent and reviews the result. A "Request changes" review from Marvin blocks the merge until he resolves it.
+3. The **approver** is Elli or Eugen, never the author. The approver approves and merges via **squash** after Marvin has reviewed, or after 48 hours without a response from him.
+4. After the merge, the approver moves the issue to Ready for QA.
+5. **Marvin** runs QA and writes the result as a comment. If a criterion fails, the issue goes back to In Progress.
+6. **Elli** gives the final acceptance and sets the issue to Done.
+
+Agents never approve, merge or set an issue to Done.
+
+### Linear statuses
+Target statuses are Backlog, Ready, In Progress, Code Review, Ready for QA, Done. Until Elli has set them up in Linear, use this mapping:
+
+| Target | Today in Linear |
+|--------|-----------------|
+| Backlog | Backlog |
+| Ready | Todo |
+| In Progress | In Progress |
+| Code Review | In Progress, with the PR linked |
+| Ready for QA | In Progress, plus a comment "Ready for QA" |
+| Done | Done |
+
+### Keeping the repo and Linear in sync
+- Do not copy changing Linear data into the repo (assignees, issue statuses, "who works on what"). Link to Linear instead.
+- A branch or PR title that contains the issue ID (`ELL-12`) links to the issue automatically. Linear's own suggested branch name uses another format; use ours, it links just as well.
+- Once the statuses exist, set up the Linear GitHub integration so that an opened PR moves the issue to Code Review and a merged PR moves it to Ready for QA, not Done.
+- When you notice a difference between a doc and Linear, Linear wins; fix the doc in a small PR. Occasionally ask your Claude Code to compare the docs with Linear.
+
+## Syncing
+This is a hobby project, so there is no fixed meeting schedule. We sync ad hoc or when there is time, and Elli takes the lead. Day to day, the Linear board, open PRs and `main` show everyone what happened.
+
+A visual guide to the whole workflow, including agents: [team-workflow.html](team-workflow.html) (open it in a browser after cloning).
+
+## Guardrails on the free GitHub plan
+Branch protection and rulesets are not available for private repos on the free plan, so the rules above are agreed by convention, with these supports:
+- Repo settings: only squash merges allowed, head branches deleted after merge.
+- Shared Claude Code settings (`.claude/settings.json`) block pushes to `main`, force pushes, `gh pr merge`, `gh pr review` and reading `.env` files. This is best effort for Claude Code sessions, not a security boundary.
+- PR template and CODEOWNERS request the right reviews.
+- We revisit real enforcement if the repo goes public or we move to a paid plan.
 
 ## Quality gates (Marvin)
 - Tests pass; new logic has tests.
@@ -55,4 +94,5 @@ Linear's target workflow statuses are Backlog, Ready, In Progress, Code Review, 
 - Work only on a branch, never directly on `main`.
 - Commit/push only when instructed by a team member.
 - Never read, write or output secrets.
+- Never approve or merge a PR and never set an issue to Done.
 - When unsure, ask instead of guessing.

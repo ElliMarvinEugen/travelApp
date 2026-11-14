@@ -279,13 +279,13 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 56px; color: var
       <span class="status">Ready for QA</span><span class="arrow">→</span>
       <span class="status">Done</span>
     </div>
-    <p style="color:var(--muted);font-size:.88rem;margin-top:8px">Still open: Elli sets these statuses up in Linear (ELL-14). Until then the board only has Backlog, Todo, In Progress, Done.</p>
+    <p style="color:var(--muted);font-size:.88rem;margin-top:8px">Still open: Elli sets these statuses up in Linear. Until then: Ready = Todo, Code Review = In Progress with the PR linked, Ready for QA = In Progress plus a comment.</p>
   </div>
 </section>
 
 <section id="task">
   <h2>Life of one task, from idea to main</h2>
-  <p class="intro">This is the same path for everyone and for agents. Example: ELL-10 "Invite Travelers".</p>
+  <p class="intro">This is the same path for everyone and for agents. Example: ELL-10 "Invite Travelers". Commands use Git Bash syntax; in Windows PowerShell 5.1, run each line on its own.</p>
   <ol class="steps">
     <li>
       <div class="step-body">
@@ -323,21 +323,21 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
       <div class="step-body">
         <div class="step-head"><span class="chip marvin">Marvin</span><span class="chip agent">security-reviewer</span><span class="chip github plain">GitHub</span></div>
         <h3>Security and quality review</h3>
-        <p>Marvin runs the <strong>security-reviewer</strong> agent on the branch and reviews the findings. Secrets, input validation, user data, new dependencies, tests. Marvin can <strong>veto</strong> a release over security findings.</p>
+        <p>Marvin runs the <strong>security-reviewer</strong> agent on the branch and reviews the findings. Secrets, input validation, user data, new dependencies, tests. Marvin can <strong>veto</strong> a release over security findings. A <strong>Request changes</strong> review from Marvin blocks the merge until he resolves it.</p>
       </div>
     </li>
     <li>
       <div class="step-body">
         <div class="step-head"><span class="chip elli">Elli</span><span class="chip eugen">Eugen</span><span class="chip github plain">GitHub</span><span class="status">Code Review → Ready for QA</span></div>
         <h3>Approval and squash merge</h3>
-        <p>Every PR needs approval from <strong>Elli or Eugen</strong>. Then it is merged with <strong>squash</strong> into <code>main</code>. One PR becomes one clean commit.</p>
+        <p>Every PR needs approval from <strong>Elli or Eugen</strong>, never the author. The approver merges with <strong>squash</strong> into <code>main</code> after Marvin has reviewed, or after 48 hours without his response, then moves the issue to Ready for QA. One PR becomes one clean commit.</p>
       </div>
     </li>
     <li>
       <div class="step-body">
         <div class="step-head"><span class="chip marvin">Marvin</span><span class="chip elli">Elli</span><span class="chip linear plain">Linear</span><span class="status">Ready for QA → Done</span></div>
         <h3>QA and Definition of Done</h3>
-        <p>The feature is tested against its acceptance criteria. Done means: criteria met, reviewed, tests pass, no critical bugs, QA complete, docs updated, approved for release. Marvin leads QA, Elli gives the final acceptance.</p>
+        <p>The feature is tested against its acceptance criteria. If one fails, the issue goes back to In Progress. Agents never set Done. Done means: criteria met, reviewed, tests pass, no critical bugs, QA complete, docs updated, approved for release. Marvin leads QA, Elli gives the final acceptance.</p>
       </div>
     </li>
     <li>
@@ -384,7 +384,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
     </div>
     <div class="card">
       <h3>5 · Connect Linear</h3>
-      <p>The repo contains the Linear connection (<code>.mcp.json</code>). Sign in to Linear once when Claude asks, or add the connector under Settings → Connectors.</p>
+      <p>The repo contains the Linear connection (<code>.mcp.json</code>). Claude Code asks you once to approve the project server; then sign in to Linear with <code>/mcp</code>. Do not add a second Linear connector in the app settings, because agents rely on the same tool names on every machine.</p>
       <p>Check: ask your Claude "Which Linear issues are assigned to me?"</p>
     </div>
   </div>
@@ -423,7 +423,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
           <li><strong>Approves and merges</strong> PRs (squash).</li>
         </ul>
       </div>
-      <div class="now"><b>Right now:</b> ELL-13 scope &amp; MVP, ELL-14 Linear workflow, ELL-17 app setup.</div>
+      <div class="now"><b>Right now:</b> see your assigned issues in Linear.</div>
     </div>
 
     <div class="person marvin">
@@ -453,7 +453,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
           <li><strong>Leads QA</strong> before a task becomes Done.</li>
         </ul>
       </div>
-      <div class="now"><b>Right now:</b> ELL-16 Git &amp; PR strategy, ELL-18 ESLint/Prettier, ELL-19 secrets.</div>
+      <div class="now"><b>Right now:</b> see your assigned issues in Linear.</div>
     </div>
 
     <div class="person eugen">
@@ -483,7 +483,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
           <li>Repository admin: access, settings, rulesets.</li>
         </ul>
       </div>
-      <div class="now"><b>Right now:</b> ELL-15 repo, ELL-21 CLAUDE.md, ELL-23 GitHub tools, ELL-24 subagents.</div>
+      <div class="now"><b>Right now:</b> see your assigned issues in Linear.</div>
     </div>
 
   </div>
@@ -544,7 +544,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
       <div class="who agent">Agents<small>inside a session</small></div>
       <div><b>product-owner</b> drafts story, acceptance criteria, open questions. It only suggests.</div>
       <div>The session <b>reads the issue</b> in Linear, creates the branch, writes code and tests under <code>RULES.md</code>.</div>
-      <div><b>security-reviewer</b> checks the diff. Planned: UI/UX and QA agents (ELL-24).</div>
+      <div><b>security-reviewer</b> checks the diff. Planned: UI/UX and QA agents.</div>
       <div class="empty">–</div>
       <div>Next session: after <code>git pull</code> the agent knows the new code.</div>
 
@@ -602,6 +602,7 @@ gh pr create</code><button type="button" data-copy="git push -u origin feat/ELL-
       <div><strong>Commit and push on request</strong>Only when a team member asks for it.</div>
       <div><strong>Linear: read freely, write on request</strong>Creating or changing issues only when a person asks.</div>
       <div><strong>No secrets</strong>Agents never read, write or print tokens, passwords or <code>.env</code> files.</div>
+      <div><strong>Never approve, merge or close</strong>Agents do not approve or merge PRs and never set an issue to Done.</div>
       <div><strong>Ask when unsure</strong>Decisions belong to the role. Agents do not choose stack or paid services.</div>
       <div><strong>Same rules as humans</strong>English, useful comments, naming convention.</div>
     </div>

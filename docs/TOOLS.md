@@ -23,26 +23,26 @@ Open decisions: final stack, cost limits per service (free tiers vs. paid), who 
 ## Process & tooling
 | Purpose | Tool |
 |---------|------|
-| Code & version control | Git, GitHub (`ekutschkin-priv/travelApp`) |
+| Code & version control | Git, GitHub (`ekutschkin-priv/travelApp`, free plan) |
 | Backlog, planning, kanban/agile board | Linear, workspace "Elli Huynh", team key `ELL` |
 | Code review | GitHub pull requests, template in `.github/`, squash merge |
 | AI-assisted development | Claude Code with subagents (configuration in `CLAUDE.md` and `.claude/`) |
-| Security check | `/security-review` (Claude Code) plus agent `security-reviewer` |
+| Security check | `/security-review` (Claude Code, general-purpose) and agent `security-reviewer` (knows our rules and the Linear issue) |
 
-Still to be defined by the team (tracked in Linear): linting/formatting (ELL-18), env vars and secrets (ELL-19), CI and testing, secret scanning.
+Still to be defined by the team (tracked in Linear): linting and formatting, environment variables and secrets, CI and testing, secret scanning.
 
 ## Linear
 - Linear is the source of truth for the backlog and planning. GitHub Issues are not used.
-- Claude Code accesses Linear through the Linear connector (MCP), so agents can read issues, projects, documents and comments.
+- Claude Code accesses Linear through the project's `.mcp.json` (server `linear-server`). This is the only supported way, so agent tool names are the same on every machine. Claude Code asks you to approve the project server once; then sign in via `/mcp`. Do not add a second Linear connector in the app settings.
 - Link work to Linear: use the Linear issue ID in branch names and PR titles (e.g. `feat/ELL-12-trip-list`) so Linear and GitHub connect automatically.
-- Write access (creating or editing issues, changing status) by agents only on request of a team member.
+- Agents read Linear freely. Creating or editing issues only on request of a team member, and agents never set an issue to Done.
 
 ## Agents (`.claude/agents/`)
 | Agent | For | Purpose | Status |
 |-------|-----|---------|--------|
 | `product-owner` | Elli | Refine ideas into user stories with acceptance criteria | exists |
 | `security-reviewer` | Marvin | Review changes for backend/security and quality problems | exists |
-| UI/UX reviewer | Elli | Review UI changes for usability and design quality | planned (ELL-24) |
-| QA/testing | Marvin | Test planning and QA checks | planned (ELL-24) |
+| UI/UX reviewer | Elli | Review UI changes for usability and design quality | planned |
+| QA/testing | Marvin | Test planning and QA checks | planned |
 
-The initial subagent architecture is Eugen's task ELL-24; the table above is a starting point and follows the outcome of that issue.
+Agents are read-only helpers, use a cheaper model (`sonnet`) and report in the findings format from `docs/RULES.md`. The final roster is defined in the subagents task in Linear; the table above is a starting point.

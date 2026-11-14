@@ -24,7 +24,7 @@ One convention for the whole project. Defaults below apply to TypeScript/JavaScr
 
 | Thing | Convention | Example |
 |-------|------------|---------|
-| Branches | `<type>/ELL-<id>-<short-kebab-description>`, type is `feat`, `fix` or `chore` | `feat/ELL-10-invite-travelers` |
+| Branches | `<type>/ELL-<id>-<short-kebab-description>`, type is `feat`, `fix`, `chore` or `docs`. Setup and meta changes without a Linear issue may omit the ID. | `feat/ELL-10-invite-travelers` |
 | Commits | Conventional Commits, imperative mood, Linear ID in the subject or footer | `feat(trips): add invitation links (ELL-10)` |
 | Files and folders | `kebab-case` | `trip-overview.tsx` |
 | Variables, functions | `camelCase`, verb for functions | `getTripById` |
@@ -42,7 +42,7 @@ General:
 
 ## 4. Process (see `docs/TEAM.md`)
 - Never work directly on `main`; use a branch and a pull request.
-- Every PR needs approval from Elli or Eugen and is merged via squash.
+- Every PR needs approval from Elli or Eugen (never the author) and is merged via squash by the approver. Marvin reviews security and quality first. Details in `docs/TEAM.md`.
 - Keep PRs small and focused; reference the Linear issue.
 - No secrets in the repo. No new dependencies without justification in the PR.
 - Linear is the source of truth for product scope, tasks and the Definition of Done.
@@ -51,4 +51,13 @@ General:
 - Follow this file and `CLAUDE.md`, same as humans.
 - Commit or push only when a team member asks.
 - Never read, write or output secrets.
+- Never approve or merge a PR and never set a Linear issue to Done. Humans decide at the gates.
+- Read Linear freely; create or change issues only when a team member asks.
 - When unsure or when a request conflicts with these rules, ask instead of guessing.
+
+## 6. Review findings format
+Used by every reviewer, human or agent, so results look the same.
+- Order findings by severity: critical, high, medium, low.
+- Each finding has: `file:line`, what is wrong, why it matters (risk or violated rule), and a concrete fix.
+- If nothing is found, say "No findings" and list what was checked.
+- Reviewers report only. They do not change code, approve or merge.

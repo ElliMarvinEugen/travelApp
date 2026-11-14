@@ -1,0 +1,26 @@
+# Secrets and local environment files (keep .env.example)
+.env
+.env.*
+!.env.example
+
+# Personal Claude Code settings (shared settings live in .claude/settings.json)
+.claude/settings.local.json
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

@@ -1,10 +1,4 @@
-# Default: Elli or Eugen review everything
-*                    @elliHuynh @ekutschkin-priv
-
-# Agent setup and tooling docs are owned by Eugen
-/CLAUDE.md           @ekutschkin-priv
-/.claude/            @ekutschkin-priv
-/docs/TOOLS.md       @ekutschkin-priv
-
-# Security-sensitive areas also need Marvin
-/.github/            @ekutschkin-priv @marvinvec
+# Owners on one line are alternatives: a review from any of them satisfies the rule.
+# This file requests reviews automatically. The actual approval rule is by convention
+# (see docs/TEAM.md): approval from Elli or Eugen (never the author), Marvin reviews security and quality.
+*    @elliHuynh @ekutschkin-priv @marvinvec

@@ -3,14 +3,28 @@
     "deny": [
       "Read(./.env)",
       "Read(./.env.local)",
-      "Read(./.env.*.local)",
+      "Read(./.env.development)",
+      "Read(./.env.test)",
       "Read(./.env.production)",
+      "Read(./.env.*.local)",
       "Bash(git push origin main*)",
+      "Bash(git push -u origin main*)",
       "Bash(git push origin HEAD:main*)",
       "Bash(git push --force*)",
       "Bash(git push -f*)",
       "Bash(gh pr merge*)",
-      "Bash(gh pr review*)"
+      "Bash(gh pr review*)",
+      "PowerShell(git push origin main*)",
+      "PowerShell(git push -u origin main*)",
+      "PowerShell(git push origin HEAD:main*)",
+      "PowerShell(git push --force*)",
+      "PowerShell(git push -f*)",
+      "PowerShell(gh pr merge*)",
+      "PowerShell(gh pr review*)"
+    ],
+    "ask": [
+      "mcp__linear-server__save_issue",
+      "mcp__linear-server__save_comment"
     ]
   }
 }

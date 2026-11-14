@@ -38,11 +38,4 @@ Still to be defined by the team (tracked in Linear): linting and formatting, env
 - Agents read Linear freely. Creating or editing issues only on request of a team member, and agents never set an issue to Done.
 
 ## Agents (`.claude/agents/`)
-| Agent | For | Purpose |
-|-------|-----|---------|
-| `product-owner` | Elli | Refine ideas into user stories with acceptance criteria |
-| `code-reviewer` | Marvin | Review changes for security, backend and rule problems |
-| `ui-ux-reviewer` | Elli | Review UI changes for usability, accessibility and consistency |
-| `qa-tester` | Marvin | Test plan and QA checklist from the acceptance criteria |
-
-Skills (`.claude/skills/`): `/start-task`, `/review-pr`, `/open-pr`. Details, permissions and limitations: `docs/AGENTS.md`.
+Agents (`product-owner`, `code-reviewer`, `ui-ux-reviewer`, `qa-tester`) and skills (`/start-task`, `/review-pr`, `/open-pr`) are described in `docs/AGENTS.md`, including prerequisites, permissions and limitations.

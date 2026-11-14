@@ -80,7 +80,7 @@ A visual guide to the whole workflow, including agents: [team-workflow.html](tea
 ## Guardrails on the free GitHub plan
 Branch protection and rulesets are not available for private repos on the free plan, so the rules above are agreed by convention, with these supports:
 - Repo settings: only squash merges allowed, head branches deleted after merge.
-- Shared Claude Code settings (`.claude/settings.json`) block pushes to `main`, force pushes, `gh pr merge`, `gh pr review` and reading `.env` files. This is best effort for Claude Code sessions, not a security boundary.
+- Shared Claude Code settings (`.claude/settings.json`) block pushes to `main`, force pushes, `gh pr merge`, `gh pr review` and reading common `.env` files in the Bash and PowerShell tools, and ask before writing to Linear. This is easy to get around (for example `git push origin HEAD` while on `main`, or `cat .env`), so it is best effort for Claude Code sessions, not a security boundary. A shared git hook is a possible later step.
 - PR template and CODEOWNERS request the right reviews.
 - We revisit real enforcement if the repo goes public or we move to a paid plan.
 

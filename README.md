@@ -13,7 +13,8 @@ Collaborative, AI-powered travel planning web app we are building as a group of 
 - [Team & roles, workflow, quality gates](docs/TEAM.md)
 - [Team workflow guide (visual, open in a browser)](docs/team-workflow.html)
 - [Project rules (language, comments, naming)](docs/RULES.md)
-- [Tools & agents](docs/TOOLS.md)
+- [Tools](docs/TOOLS.md)
+- [Agents and skills](docs/AGENTS.md)
 - [Rules for Claude Code](CLAUDE.md)
 
 ## Status

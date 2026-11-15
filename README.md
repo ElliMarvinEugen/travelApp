@@ -10,6 +10,8 @@ Collaborative, AI-powered travel planning web app we are building as a group of 
 | Eugen | [@ekutschkin-priv](https://github.com/ekutschkin-priv) | Agent Conductor (Architect for Agents) |
 
 ## Documentation
+- [Setup guide (start here)](docs/SETUP.md)
+- [AI-based development one-pager](docs/ai-development-onepager.md)
 - [Team & roles, workflow, quality gates](docs/TEAM.md)
 - [Team workflow guide (visual, open in a browser)](docs/team-workflow.html)
 - [Project rules (language, comments, naming)](docs/RULES.md)

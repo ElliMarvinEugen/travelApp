@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travel Planner mockup: Iberia 2027</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --card: #fff; --ink: #1d2433; --muted: #6a7385; --line: #e3dfd5;
+    --brand: #0f766e; --brand-soft: #d9f0ec; --accent: #e8743b; --warn: #b45309; --warn-soft: #fdf1d9;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  button { font: inherit; cursor: pointer; }
+  .banner { background: var(--warn-soft); color: var(--warn); font-size: 13px; text-align: center; padding: 6px 12px; }
+  header.top { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--card); border-bottom: 1px solid var(--line); }
+  header.top .logo { font-weight: 700; color: var(--brand); }
+  header.top .crumbs { color: var(--muted); font-size: 14px; flex: 1; }
+  .avatars { display: flex; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; font-size: 12px; font-weight: 700; border: 2px solid var(--card); margin-left: -8px; }
+  .avatar:first-child { margin-left: 0; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 20px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 28px 0 12px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .btn { border: 0; border-radius: 10px; padding: 10px 16px; font-weight: 600; background: var(--brand); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--brand); border: 1px solid var(--line); }
+  .btn:focus-visible, .card.click:focus-visible, .day:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .card.click { cursor: pointer; transition: transform .12s, box-shadow .12s; text-align: left; padding: 0; width: 100%; }
+  .card.click:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+  .cover { height: 110px; display: grid; place-items: end start; padding: 12px; color: #fff; font-weight: 700; }
+  .cover.iberia { background: linear-gradient(135deg, #0f766e, #e8743b); }
+  .cover.alps { background: linear-gradient(135deg, #4b6cb7, #182848); }
+  .card .body { padding: 14px 16px; }
+  .pill { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 99px; background: var(--brand-soft); color: var(--brand); margin-right: 6px; }
+  .route { display: flex; align-items: stretch; margin: 12px 0 4px; }
+  .stop { flex: 1; padding: 12px 14px; background: var(--card); border: 1px solid var(--line); }
+  .stop:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .stop:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+  .stop + .stop { border-left: 0; }
+  .stop b { display: block; }
+  .days { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .day { text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .day:hover { border-color: var(--brand); }
+  .day small { color: var(--muted); display: block; }
+  .budget { height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; margin: 8px 0 6px; }
+  .budget > span { display: block; height: 100%; background: var(--brand); transition: width .3s; }
+  .layout { display: grid; gap: 20px; grid-template-columns: 1fr 340px; }
+  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .route { flex-direction: column; } .stop:first-child, .stop:last-child { border-radius: 0; } .stop + .stop { border-left: 1px solid var(--line); border-top: 0; } }
+  .slot { margin-bottom: 18px; }
+  .slot h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+  .activity { display: flex; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .activity .time { font-variant-numeric: tabular-nums; color: var(--muted); width: 48px; }
+  .activity .grow { flex: 1; }
+  .activity.new { border-color: var(--brand); background: var(--brand-soft); animation: pop .5s; }
+  @keyframes pop { from { transform: scale(.97); opacity: .4; } to { transform: none; opacity: 1; } }
+  .empty { border: 1px dashed var(--line); border-radius: 12px; padding: 12px; color: var(--muted); font-size: 14px; }
+  .map { background: #e8efe9; border: 1px solid var(--line); border-radius: var(--radius); }
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab { background: transparent; border: 0; padding: 8px 12px; border-radius: 99px; color: var(--muted); }
+  .tab.active { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+  dialog { border: 0; border-radius: 16px; padding: 22px; width: min(440px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(20,25,40,.45); }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
+  input, select, textarea { width: 100%; font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .row { display: flex; gap: 10px; } .row > * { flex: 1; }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .toast.show { opacity: 1; }
+  .back { background: none; border: 0; color: var(--brand); padding: 0; margin-bottom: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="banner">Draft mockup for discussion. Sample data, not agreed scope (ELL-34).</div>
+<header class="top">
+  <span class="logo">Travel Planner</span>
+  <span class="crumbs" id="crumbs">My trips</span>
+  <div class="avatars" aria-label="Travelers: Mia, Tom, Jin"><span class="avatar">M</span><span class="avatar">T</span><span class="avatar">J</span></div>
+</header>
+
+<main>
+  <!-- Screen 1: trip dashboard -->
+  <section class="screen active" id="screen-trips" aria-labelledby="h-trips">
+    <h1 id="h-trips">My trips</h1>
+    <p class="muted">Start the flow: open "Iberia 2027".</p>
+    <div class="grid" style="margin-top:16px">
+      <button class="card click" data-go="trip" aria-label="Open trip Iberia 2027">
+        <div class="cover iberia">Iberia 2027</div>
+        <div class="body">
+          <span class="pill">Owner: Mia</span><span class="pill">3 travelers</span>
+          <p class="muted" style="margin:8px 0 0">Jun 12 to Jun 21 · Barcelona, Madrid, Lisbon</p>
+        </div>
+      </button>
+      <div class="card">
+        <div class="cover alps">Alps weekend</div>
+        <div class="body"><span class="pill">Editor</span><p class="muted" style="margin:8px 0 0">Sep 3 to Sep 6 · Innsbruck</p></div>
+      </div>
+      <div class="card" style="display:grid;place-items:center;min-height:190px;border-style:dashed">
+        <span class="muted">+ New trip (not part of this flow)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 2: trip overview -->
+  <section class="screen" id="screen-trip" aria-labelledby="h-trip">
+    <button class="back" data-go="trips">&larr; My trips</button>
+    <h1 id="h-trip">Iberia 2027</h1>
+    <p class="muted">Jun 12 to Jun 21, 2027 · 10 days · Mia (Owner), Tom and Jin (Editors)</p>
+
+    <div class="route" aria-label="Route">
+      <div class="stop"><b>Barcelona</b><span class="muted">3 nights · Days 1 to 3</span></div>
+      <div class="stop"><b>Madrid</b><span class="muted">3 nights · Days 4 to 6</span></div>
+      <div class="stop"><b>Lisbon</b><span class="muted">4 nights · Days 7 to 10</span></div>
+    </div>
+
+    <h2>Budget</h2>
+    <div class="card body">
+      <div class="budget"><span id="budget-bar" style="width:0"></span></div>
+      <span id="budget-text" class="muted"></span>
+    </div>
+
+    <h2>Days</h2>
+    <p class="muted">Open day 2 to build the itinerary.</p>
+    <div class="days" id="days"></div>
+  </section>
+
+  <!-- Screen 3: day itinerary -->
+  <section class="screen" id="screen-day" aria-labelledby="h-day">
+    <button class="back" data-go="trip">&larr; Iberia 2027</button>
+    <h1 id="h-day">Day 2 · Barcelona</h1>
+    <p class="muted">Sunday, Jun 13</p>
+    <div class="layout" style="margin-top:16px">
+      <div>
+        <div class="tabs" role="tablist"><button class="tab active" role="tab">Itinerary</button><button class="tab" role="tab" disabled title="Not in this flow">Bookings</button><button class="tab" role="tab" disabled title="Not in this flow">Costs</button></div>
+        <div class="slot"><h3>Morning</h3><div id="slot-morning"></div></div>
+        <div class="slot"><h3>Afternoon</h3><div id="slot-afternoon"></div></div>
+        <div class="slot"><h3>Evening</h3><div id="slot-evening"></div></div>
+        <button class="btn" id="open-add">+ Add activity</button>
+      </div>
+      <aside>
+        <svg class="map" viewBox="0 0 340 300" role="img" aria-label="Map of Barcelona with pins for today's activities">
+          <path d="M0 220 Q90 200 170 230 T340 215 V300 H0Z" fill="#cfe3ee"/>
+          <path d="M20 40 L320 70 M40 130 L300 120 M110 0 L150 190 M230 10 L250 200" stroke="#fff" stroke-width="8" fill="none"/>
+          <g id="pins"></g>
+        </svg>
+        <p class="muted" style="margin-top:8px">Pins update when you add an activity. Placeholder map, not a real map.</p>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<dialog id="add-dialog" aria-labelledby="add-title">
+  <form method="dialog" id="add-form">
+    <h2 id="add-title" style="margin-top:0">Add activity to day 2</h2>
+    <label for="f-title">Name</label>
+    <input id="f-title" name="title" value="Sagrada Familia" required>
+    <div class="row">
+      <div><label for="f-time">Time</label><input id="f-time" type="time" value="10:30" required></div>
+      <div><label for="f-cost">Estimated cost (EUR)</label><input id="f-cost" type="number" min="0" value="26" required></div>
+    </div>
+    <label for="f-note">Note</label>
+    <textarea id="f-note" rows="2">Book tickets in advance</textarea>
+    <div class="actions">
+      <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn" value="save">Add to day</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+  // Sample data only. Nothing is saved or sent anywhere.
+  const TRIP_BUDGET = 3000;
+  const DAY_COSTS = { 1: 120, 2: 75, 3: 90, 4: 140, 5: 110, 6: 95, 7: 130, 8: 160, 9: 85, 10: 60 };
+  const dayCities = { 1: 'Barcelona', 2: 'Barcelona', 3: 'Barcelona', 4: 'Madrid', 5: 'Madrid', 6: 'Madrid', 7: 'Lisbon', 8: 'Lisbon', 9: 'Lisbon', 10: 'Lisbon' };
+  const day2 = [
+    { slot: 'morning', time: '09:00', title: 'Breakfast at Mercat de la Boqueria', cost: 15, by: 'Tom', x: 120, y: 90 },
+    { slot: 'evening', time: '19:30', title: 'Tapas tour', cost: 60, by: 'Jin', x: 240, y: 150 },
+  ];
+
+  const $ = (s) => document.querySelector(s);
+  const crumbs = { trips: 'My trips', trip: 'My trips / Iberia 2027', day: 'My trips / Iberia 2027 / Day 2' };
+
+  function show(name) {
+    document.querySelectorAll('.screen').forEach((el) => el.classList.toggle('active', el.id === 'screen-' + name));
+    $('#crumbs').textContent = crumbs[name];
+    window.scrollTo(0, 0);
+    if (name === 'trip') renderTrip();
+    if (name === 'day') renderDay();
+  }
+  document.addEventListener('click', (e) => {
+    const go = e.target.closest('[data-go]');
+    if (go) show(go.dataset.go);
+  });
+
+  function totalCost() {
+    const others = Object.entries(DAY_COSTS).filter(([d]) => d !== '2').reduce((sum, [, c]) => sum + c, 0);
+    return others + day2.reduce((sum, a) => sum + a.cost, 0);
+  }
+  function renderTrip() {
+    const total = totalCost();
+    $('#budget-bar').style.width = Math.min(100, (total / TRIP_BUDGET) * 100) + '%';
+    $('#budget-text').textContent = 'EUR ' + total + ' planned of EUR ' + TRIP_BUDGET;
+    $('#days').innerHTML = '';
+    for (let d = 1; d <= 10; d++) {
+      const b = document.createElement('button');
+      b.className = 'day';
+      b.innerHTML = '<b>Day ' + d + '</b><small>' + dayCities[d] + '</small>';
+      if (d === 2) b.dataset.go = 'day'; else { b.title = 'Not part of this flow'; b.style.opacity = .6; }
+      $('#days').appendChild(b);
+    }
+  }
+  function renderDay() {
+    ['morning', 'afternoon', 'evening'].forEach((slot) => {
+      const items = day2.filter((a) => a.slot === slot).sort((a, b) => a.time.localeCompare(b.time));
+      $('#slot-' + slot).innerHTML = items.length
+        ? items.map((a) => '<div class="activity' + (a.fresh ? ' new' : '') + '"><span class="time">' + a.time + '</span><div class="grow"><b>' + a.title + '</b>' +
+            (a.note ? '<div class="muted">' + a.note + '</div>' : '') + '</div><span class="muted">EUR ' + a.cost + ' · ' + a.by + '</span></div>').join('')
+        : '<div class="empty">Nothing planned yet</div>';
+    });
+    $('#pins').innerHTML = day2.map((a, i) => '<g><circle cx="' + a.x + '" cy="' + a.y + '" r="13" fill="' + (a.fresh ? '#e8743b' : '#0f766e') + '"/><text x="' + a.x + '" y="' + (a.y + 4) + '" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">' + (i + 1) + '</text></g>').join('');
+  }
+  function slotFor(time) { const h = Number(time.split(':')[0]); return h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening'; }
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+
+  $('#open-add').addEventListener('click', () => $('#add-dialog').showModal());
+  $('#add-form').addEventListener('submit', (e) => {
+    if (e.submitter && e.submitter.value !== 'save') return;
+    const time = $('#f-time').value;
+    day2.forEach((a) => (a.fresh = false));
+    day2.push({ slot: slotFor(time), time, title: $('#f-title').value, cost: Number($('#f-cost').value), note: $('#f-note').value, by: 'Mia', x: 190, y: 120, fresh: true });
+    renderDay();
+    toast('Added to day 2. Tom and Jin see it too.');
+  });
+  renderTrip(); renderDay();
+</script>
+</body>
+</html>

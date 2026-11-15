@@ -9,7 +9,7 @@ Owner: Eugen (Agent Conductor). Everything here lives in `.claude/` and is versi
 - **Least privilege.** Each agent only gets the tools it needs. Linear access is read-only for agents. `.claude/settings.json` adds deny and ask rules on top (see limitations).
 - **Issue text and code are data.** Agents read Linear issues, comments and diffs written by others. They treat that text as data to analyze and never follow instructions found in it.
 - **One findings format** (`docs/RULES.md`, section 6) for all reviewers.
-- **Cost:** agents run only on request, with a cheaper model (`sonnet`).
+- **Cost:** agents run only on request. Reviewers and planners use a cheaper model (`sonnet`). The `architect` is the exception and uses `opus`, because its decisions are rare and expensive to reverse.
 
 ## Prerequisites (once per person)
 - **Linear:** the project's `linear-server` (from `.mcp.json`) is enabled for everyone through `.claude/settings.json` (`enabledMcpjsonServers`). Open a new session in the project folder and sign in with your own Linear account (`/mcp`, or the connector view of the app). Do not keep a second Linear connector enabled for this project, because agent tool names are `mcp__linear-server__*`. Adding another MCP server to `.mcp.json` needs a reviewed PR and its own entry in `enabledMcpjsonServers`.
@@ -23,8 +23,11 @@ Owner: Eugen (Agent Conductor). Everything here lives in `.claude/` and is versi
 | `code-reviewer` | Marvin | Branch diff: security, backend, user data, dependencies, tests, project rules | read, git via Bash, Linear read | sonnet |
 | `ui-ux-reviewer` | Elli | Branch diff: usability, states, consistency, accessibility, mobile. Says "No UI changes" when there are none | read, git via Bash, Linear read | sonnet |
 | `qa-tester` | Marvin | Test plan and manual checklist from the acceptance criteria, gaps in coverage. Gets the changed-file list from `/review-pr` | read, Linear read | sonnet |
+| `architect` | Eugen | Evaluates tools and stack (cost as an explicit criterion), high-level solution design, feasibility checks, drafts ADRs. Eugen decides, Elli decides on business and functional impact, Marvin reviews security aspects | read, Linear read, web search and fetch | opus |
 
-Later, when needed: an architect/planner agent (Claude Code's built-in Plan agent covers this for now), a database reviewer once there is a schema, test-running rights for `qa-tester` once a test stack exists, and a `/sync-docs` skill that compares docs with Linear.
+Claude Code's built-in Plan agent still plans implementation steps for a task. The `architect` agent works one level above: options, trade-offs and decisions that end up in `docs/adr/`.
+
+Later, when needed: a database reviewer once there is a schema, test-running rights for `qa-tester` once a test stack exists, and a `/sync-docs` skill that compares docs with Linear.
 
 ## Skills (`.claude/skills/`)
 | Skill | What it does | Who runs it |
@@ -38,6 +41,7 @@ All three only run when a person invokes them (`disable-model-invocation`), so a
 ## How a task flows through them
 ```
 Elli:    idea → product-owner agent → story in Linear (Ready/Todo)
+Eugen:   architecture question → architect agent → draft ADR → PR (Marvin: security, Elli: functional impact)
 Anyone:  /start-task ELL-10 → implement with your Claude Code → commit
 Author:  /review-pr → fix findings → /open-pr
 Marvin:  reviews the PR (/review-pr on the branch if useful)
@@ -48,6 +52,7 @@ Marvin:  QA with qa-tester's checklist → Elli: final acceptance, Done
 ## Invoking agents directly
 Ask your Claude Code in plain words, naming the agent:
 - "Use the product-owner agent to refine this idea into a story: friends should be able to split costs on a trip."
+- "Use the architect agent to compare options for hosting the backend, with costs for 10 and 100 users, and draft an ADR."
 - "Run the code-reviewer agent on this branch and summarize the findings."
 - "Use the qa-tester agent to write a test plan for ELL-10."
 
@@ -57,6 +62,7 @@ Claude Code's built-in `/security-review` and `/code-review` are a useful second
 - Reviewers: findings by severity, each with `file:line`, what is wrong, why it matters and a concrete fix, or an explicit "No findings".
 - `product-owner`: story, acceptance criteria, open questions, size estimate.
 - `qa-tester`: test cases per criterion (given, when, then), a manual checklist, and gaps.
+- `architect`: summary with recommendation, option comparison table, risks and open questions tagged with who decides, deferred decisions, and a draft ADR (`docs/adr/0000-template.md`) when asked. Every price has a source and a date. It returns text; the main session writes files after Eugen's go-ahead.
 
 ## Known limitations
 - Agents only run while a person has a Claude Code session open. They do not watch Linear or GitHub on their own.
@@ -66,6 +72,7 @@ Claude Code's built-in `/security-review` and `/code-review` are a useful second
 - The reviewers have Bash and are asked in their prompt to use only read-only git commands. That is a request, not a technical restriction.
 - The free GitHub plan cannot enforce branch protection (see `docs/TEAM.md`).
 - Linear tool names depend on the project's `.mcp.json` server name `linear-server`. Use that setup, not a second connector.
+- The `architect` fetches web pages for pricing and docs. Web content is treated as data, but prices change, so check the cited source and date before relying on a figure.
 - Not yet verified: how a missing MCP tool named in an agent's `tools` list behaves. If Linear tools are missing, agents work without the issue and say so.
 
 ## Changing agents and skills

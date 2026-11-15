@@ -20,6 +20,8 @@ Principles from Linear: build the MVP before AI features, keep the app fully fun
 
 Open decisions: final stack, cost limits per service (free tiers vs. paid), who owns accounts and billing.
 
+How it gets decided: the `architect` agent compares the options (cost is an explicit criterion) and drafts an ADR in `docs/adr/`. Eugen decides on the technical architecture, Elli on business and functional impact including the cost the product has to bear, and Marvin reviews the security aspects. Until an ADR is accepted, the stack stays an idea.
+
 ## Process & tooling
 | Purpose | Tool |
 |---------|------|
@@ -38,4 +40,4 @@ Still to be defined by the team (tracked in Linear): linting and formatting, env
 - Agents read Linear freely. Creating or editing issues only on request of a team member, and agents never set an issue to Done.
 
 ## Agents (`.claude/agents/`)
-Agents (`product-owner`, `code-reviewer`, `ui-ux-reviewer`, `qa-tester`) and skills (`/start-task`, `/review-pr`, `/open-pr`) are described in `docs/AGENTS.md`, including prerequisites, permissions and limitations.
+Agents (`product-owner`, `architect`, `code-reviewer`, `ui-ux-reviewer`, `qa-tester`) and skills (`/start-task`, `/review-pr`, `/open-pr`) are described in `docs/AGENTS.md`, including prerequisites, permissions and limitations.

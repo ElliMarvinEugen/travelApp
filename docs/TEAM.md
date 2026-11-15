@@ -79,7 +79,7 @@ Target statuses are Backlog, Ready, In Progress, Code Review, Ready for QA, Done
 ## Syncing
 This is a hobby project, so there is no fixed meeting schedule. We sync ad hoc or when there is time, and Elli takes the lead. Day to day, the Linear board, open PRs and `main` show everyone what happened.
 
-A visual guide to the whole workflow, including agents: [team-workflow.html](team-workflow.html) (open it in a browser after cloning).
+New to AI-based development here? Start with the [one-pager](ai-development-onepager.md) (agents, skills, ground rules). A visual guide to the whole workflow, including agents: [team-workflow.html](team-workflow.html) (open it in a browser after cloning).
 
 ## Guardrails on the free GitHub plan
 Branch protection and rulesets are not available for private repos on the free plan, so the rules above are agreed by convention, with these supports:

@@ -3,7 +3,7 @@
 One-time setup for every team member. Afterwards, working on the project means opening your clone in Claude Code. Context: [one-pager](ai-development-onepager.md), [workflow guide](team-workflow.html), [agents and skills](AGENTS.md).
 
 ## 1. Get access
-- **GitHub:** you are a collaborator on the private repo `ekutschkin-priv/travelApp`.
+- **GitHub:** you are a collaborator on the private repo `ElliMarvinEugen/travelApp`.
 - **Linear:** you are a member of the workspace (team key `ELL`).
 
 ## 2. Install the tools
@@ -27,7 +27,7 @@ gh auth login --web --git-protocol https
 
 ## 4. Clone the repo and open it in Claude Code
 ```bash
-git clone https://github.com/ekutschkin-priv/travelApp.git
+git clone https://github.com/ElliMarvinEugen/travelApp.git
 ```
 
 Open the folder as the project in Claude Code. It loads `CLAUDE.md` and `docs/RULES.md` automatically, so your session follows the same rules as everyone else's.

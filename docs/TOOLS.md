@@ -25,7 +25,7 @@ How it gets decided: the `architect` agent compares the options (cost is an expl
 ## Process & tooling
 | Purpose | Tool |
 |---------|------|
-| Code & version control | Git, GitHub (`ekutschkin-priv/travelApp`, free plan) |
+| Code & version control | Git, GitHub (`ElliMarvinEugen/travelApp`, free plan) |
 | Backlog, planning, kanban/agile board | Linear, workspace "Elli Huynh", team key `ELL` |
 | Code review | GitHub pull requests, template in `.github/`, squash merge |
 | AI-assisted development | Claude Code with subagents (configuration in `CLAUDE.md` and `.claude/`) |

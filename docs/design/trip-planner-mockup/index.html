@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vietnam Trip Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700&display=swap">
+<style>
+/* Layout: sidebar (days grouped by city) | itinerary with its own scroll area | sticky map at 40% of the screen. */
+:root{
+  --bg:#fbf8f3;--surface:#ffffff;--card:#f6f1e9;--line:#ece6db;--fg:#1f2933;--muted:#717880;
+  --accent:#0f6b6e;--accent-bg:#e0f1ee;--on-accent:#ffffff;--primary:#0f6b6e;--on-primary:#ffffff;
+  color-scheme:light;
+  --shop-bg:#fbe6ef;--shop-fg:#8a2150;--food-bg:#fde9dc;--food-fg:#9a4313;
+  --sight-bg:#e9e7fb;--sight-fg:#3f3a99;--cafe-bg:#fbf0cf;--cafe-fg:#7a5a07;--nature-bg:#dcf1e4;--nature-fg:#1f6a3e;
+  --ok-bg:#e1f3e8;--ok-fg:#1d6a3a;--warn-bg:#fdeccf;--warn-fg:#8a5206;--hot-bg:#fde1dc;--hot-fg:#9b2a1a;
+  --land:#eaf0e8;--sea:#a9d6ea;--sand:#f1e2b6;--park:#cde6cb;--road:#ffffff;--roadline:#d9e0da;--lbl:#5a6a64;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-head:'Plus Jakarta Sans','Inter',system-ui,sans-serif;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:14px;overflow:hidden;display:flex;flex-direction:column}
+button{font:inherit;color:inherit}
+svg.i{width:16px;height:16px;flex:none;stroke-width:2}
+.shop{background:var(--shop-bg);color:var(--shop-fg)}
+.food{background:var(--food-bg);color:var(--food-fg)}
+.sight{background:var(--sight-bg);color:var(--sight-fg)}
+.cafe{background:var(--cafe-bg);color:var(--cafe-fg)}
+.nature{background:var(--nature-bg);color:var(--nature-fg)}
+.ai{background:var(--accent-bg);color:var(--accent)}
+.app{flex:1;min-height:0;display:grid;grid-template-columns:224px minmax(420px,1fr) minmax(0,44%);background:var(--bg)}
+.side{border-right:1px solid var(--line);background:var(--surface);padding:20px 12px;overflow:auto;font-size:13px}
+.brand{font-family:var(--font-head);font-weight:700;font-size:16px;padding:2px 10px 2px}
+.brandsub{padding:0 10px 16px;color:var(--muted);font-size:12px}
+.sn{padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:10px}
+.sn:hover{background:var(--card)}
+.sn.act{background:var(--accent-bg);color:var(--accent);font-weight:600}
+.sh{padding:18px 10px 6px;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.city{display:flex;align-items:center;gap:8px;padding:12px 10px 4px;font-weight:600;font-size:13px}
+.city svg.i{color:var(--accent)}
+.sd{padding:6px 10px 6px 34px;border-radius:10px;cursor:pointer;color:var(--muted)}
+.sd:hover{background:var(--card)}
+.sd.on{color:var(--fg);font-weight:500;background:var(--card)}
+.sd small{display:block;font-weight:400;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.main{display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden}
+.head{padding:24px 28px 0}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.h1{font-family:var(--font-head);font-size:26px;font-weight:700;margin:0;letter-spacing:-0.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:var(--card);font-size:12px;font-weight:500}
+.grow{flex:1}
+.avs{display:flex}
+.av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;margin-left:-7px;border:2px solid var(--surface)}
+.av:first-child{margin-left:0}
+.av.sm{width:18px;height:18px;font-size:9px;margin:0;border:0}
+.av.sm svg.i{width:10px;height:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:20px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;background:var(--primary);color:var(--on-primary)}
+.btn.soft{background:var(--card);color:var(--fg)}
+.btn:focus-visible,.card:focus-visible,.lt:focus-visible,.chip:focus-visible,.pin:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:none;gap:6px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.cl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 2px 0 6px}
+.chip{border:0;background:var(--card);color:var(--muted);font-size:12px;padding:6px 12px;border-radius:20px;cursor:pointer}
+.chip.on{background:var(--primary);color:var(--on-primary)}
+.dh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:24px 0 14px;flex-wrap:wrap}
+.dcity{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+.dh h2{margin:4px 0 0;font-family:var(--font-head);font-size:22px;font-weight:700}
+.sub{color:var(--muted);font-size:12px}
+.lnk{font-size:13px;font-weight:500;color:var(--accent);display:inline-flex;gap:6px;align-items:center}
+.scrollwrap{flex:1;min-height:0;overflow:auto;scrollbar-gutter:stable}
+.scroll{padding:4px 28px 0}
+.list{max-width:720px}
+.card{position:relative;display:flex;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;cursor:pointer;box-shadow:0 1px 2px rgba(20,30,40,.05)}
+.card:hover{border-color:var(--muted)}
+.card.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.body{flex:1;min-width:0}
+.when{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--card);border-radius:16px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;color:var(--fg)}
+.when:hover{background:var(--accent-bg);color:var(--accent)}
+.when svg.i{width:13px;height:13px}
+.when input{border:0;background:transparent;font:inherit;color:inherit;width:78px;padding:0}
+.t{font-family:var(--font-head);font-weight:700;font-size:17px;display:flex;gap:10px;align-items:center;margin-top:10px}
+.ic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none}
+.d{color:var(--muted);font-size:13.5px;margin-top:8px;line-height:1.55}
+.chs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.ch{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:14px;padding:4px 10px;font-size:12px;font-weight:500;background:var(--card);color:var(--fg);cursor:default}
+.ch svg.i{width:13px;height:13px}
+button.ch{cursor:pointer}
+.ch.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.ch.hot{background:var(--hot-bg);color:var(--hot-fg)}
+.ch.amber{background:var(--warn-bg);color:var(--warn-fg)}
+.ch.ghost{background:transparent;border:1px dashed var(--muted);color:var(--muted)}
+.ch input{width:64px;border:0;background:transparent;font:inherit;color:inherit;padding:0}
+.warnbar{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:9px 12px;border-radius:12px;background:var(--warn-bg);color:var(--warn-fg);font-size:12.5px;line-height:1.45}
+.warnbar svg.i{margin-top:2px}
+.by{display:flex;align-items:center;gap:6px;margin-top:12px;color:var(--muted);font-size:12px}
+.ph{width:128px;border-radius:14px;overflow:hidden;flex:none;align-self:stretch;min-height:128px;background:var(--card)}
+.ph svg{width:100%;height:100%;display:block}
+.leg{position:relative;margin-left:31px;border-left:2px dotted var(--line);padding:0 0 0 18px;min-height:30px;display:flex;align-items:center;line-height:1}
+.lt{appearance:none;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;line-height:18px;color:var(--muted);border:0;outline:0;background:transparent;padding:0;margin:0;cursor:pointer}
+.lt:hover,.lt.open{color:var(--fg)}
+.lt svg.i{width:14px;height:14px}
+.pop{position:absolute;left:18px;top:100%;margin-top:-2px;width:250px;background:var(--surface);box-shadow:0 8px 28px rgba(0,0,0,.18),0 2px 6px rgba(0,0,0,.08);border-radius:14px;z-index:5;padding:6px 0;font-size:13px;line-height:1.4}
+.pr{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;color:var(--muted)}
+.pr:hover{background:var(--card)}
+.pr.sel{color:var(--accent)}
+.sep{height:8px}
+.pr input{margin-left:auto;width:96px;height:28px;font:inherit;font-size:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);padding:0 6px}
+.sg{margin-top:28px;max-width:720px}
+.sg h3{margin:0;font-family:var(--font-head);font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.sg .sub{margin:4px 0 12px}
+.sr{display:flex;gap:14px;align-items:center;padding:12px;border-radius:16px;background:var(--card);margin-bottom:10px}
+.sr .ph{width:72px;min-height:72px;height:72px;align-self:auto;border-radius:12px}
+.sr .nm{font-weight:600;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sr .ds{color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.45}
+.sr .ch{background:var(--surface)}
+.sr .ch.amber{background:var(--warn-bg)}
+.empty{padding:22px;border-radius:16px;background:var(--card);color:var(--muted);line-height:1.5}
+.addbar{display:flex;gap:10px;align-items:center;padding:18px 28px 20px;position:sticky;bottom:0;background:var(--bg)}
+.addi{flex:1;display:flex;align-items:center;gap:10px;background:var(--card);border-radius:14px;padding:0 14px;color:var(--muted);max-width:720px}
+.addi input{flex:1;min-width:0;height:44px;border:0;background:transparent;font:inherit;color:var(--fg);outline:0}
+.rail{display:flex;flex-direction:column;gap:16px;padding:20px 24px 20px 8px;min-width:0;min-height:0;box-sizing:border-box;height:100%}
+.map{position:relative;overflow:hidden;background:var(--land);min-width:0;flex:1 1 auto;min-height:260px;border-radius:30px;border:6px solid #fff;box-shadow:0 14px 34px rgba(70,50,20,.18),0 2px 8px rgba(70,50,20,.08)}
+.recs{flex:0 0 auto;max-height:48%;overflow:auto;background:var(--surface);border-radius:26px;padding:18px;border:1px solid var(--line);box-shadow:0 2px 10px rgba(70,50,20,.06)}
+.recs .sg{margin:0;max-width:none}
+.h1wrap{display:inline-flex;align-items:center;gap:10px;min-width:0;max-width:100%}
+.h1in{font:inherit;color:var(--fg);border:0;background:transparent;padding:2px 10px;margin-left:-10px;border-radius:12px;outline:0;field-sizing:content;min-width:6ch;max-width:100%}
+@supports not (field-sizing:content){.h1in{width:min(420px,60vw)}}
+.h1in:hover,.h1in:focus{background:var(--card)}
+.h1in:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+.tag{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-body);font-size:11px;font-weight:600;letter-spacing:0;color:var(--accent);background:var(--accent-bg);border-radius:10px;padding:5px 7px;white-space:nowrap}
+.tag svg.i{width:11px;height:11px}
+.aibadge{display:inline-flex;align-items:center;color:var(--accent);background:var(--accent-bg);border-radius:8px;padding:2px 5px}
+.aibadge svg.i{width:11px;height:11px}
+.rh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--card);border-radius:12px;padding:3px;gap:2px;flex:none}
+.seg button{border:0;background:transparent;border-radius:9px;padding:5px 10px;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500}
+.seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg svg.i{width:13px;height:13px}
+.rcs{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:12px -2px 0}
+.rcs.one .rc{flex:1 1 100%;display:grid;grid-template-columns:150px 1fr;column-gap:14px;row-gap:6px;align-items:start;cursor:grab}
+.rcs.one .rcp{grid-row:1/5;height:100%;min-height:128px}
+.rcs.one .rca{align-self:end;justify-self:start;margin-top:4px}
+.rc{flex:1 0 222px;scroll-snap-align:start;background:var(--card);border-radius:20px;padding:10px;display:flex;flex-direction:column;gap:8px;cursor:grab}
+.rcp{border-radius:14px;overflow:hidden;height:78px;position:relative}
+.rcp svg{width:100%;height:100%;display:block}
+.rcb{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.94);color:var(--accent);border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600;display:inline-flex;gap:4px;align-items:center}
+.rcb svg.i{width:11px;height:11px}
+.rcn{font-family:var(--font-head);font-weight:700;font-size:14px;padding:0 2px}
+.rcd{color:var(--muted);font-size:12.5px;line-height:1.45;padding:0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
+.rc .chs{margin:0;padding:0 2px}
+.rca{margin-top:auto;justify-content:center;padding:9px 14px}
+.rl{margin-top:12px}
+.srt{flex:1;min-width:0}
+.sr .ds{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sr .chs{margin-top:8px}
+[hidden]{display:none!important}
+.map svg.mapimg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pin{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.pin svg.i{width:18px;height:18px}
+.pin.on{z-index:3;box-shadow:0 0 0 3px var(--accent),0 2px 10px rgba(0,0,0,.4)}
+.pl{position:absolute;left:46px;top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--surface);color:var(--fg);font-size:12px;font-weight:600;padding:5px 10px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none}
+.mtop{position:absolute;left:14px;top:14px;display:flex;gap:8px;align-items:center}
+.mtop .btn{box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.mcity{background:var(--surface);color:var(--fg);padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.25);display:inline-flex;gap:6px;align-items:center}
+.mtag{position:absolute;right:12px;bottom:10px;font-size:10px;color:#fff;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:6px}
+.mday{position:absolute;left:14px;bottom:14px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.94);color:var(--fg);padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.hdr{display:flex;align-items:center;gap:6px;height:60px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--line);flex:none;position:relative;z-index:30}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-weight:700;font-size:17px;margin-right:24px}
+.lg{width:34px;height:34px;border-radius:11px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center}
+.lg svg.i{width:18px;height:18px}
+.menu{display:flex;gap:4px}
+.mi{border:0;background:transparent;padding:8px 14px;border-radius:20px;font-size:14px;color:var(--muted);cursor:pointer;font-weight:500}
+.mi:hover{background:var(--card);color:var(--fg)}
+.mi.on{background:var(--accent-bg);color:var(--accent)}
+.ib{width:38px;height:38px;border-radius:50%;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);position:relative}
+.ib:hover{background:var(--card)}
+.ib svg.i{width:20px;height:20px}
+.dot{position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:#e0573b;border:2px solid var(--surface)}
+.acct{position:relative;margin-left:8px}
+.avb{width:38px;height:38px;border-radius:50%;border:0;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;cursor:pointer}
+.amenu{position:absolute;right:0;top:48px;width:272px;background:var(--surface);border-radius:18px;box-shadow:0 14px 40px rgba(60,40,10,.18),0 2px 8px rgba(60,40,10,.08);padding:8px}
+.who{display:flex;gap:12px;align-items:center;padding:10px 10px 12px}
+.who b{font-family:var(--font-head);font-size:15px}
+.mr{display:flex;width:100%;align-items:center;gap:12px;border:0;background:transparent;padding:10px;border-radius:12px;font-size:14px;cursor:pointer;text-align:left}
+.mr:hover{background:var(--card)}
+.mr .sub{margin-left:auto}
+.ahr{height:1px;background:var(--line);margin:6px 4px}
+.grip{color:var(--muted);display:inline-flex;opacity:.55}
+.card:hover .grip{opacity:1}
+.row{display:flex;justify-content:space-between;align-items:center}
+.card[draggable="true"],.sr[draggable="true"]{cursor:grab}
+.dragging{opacity:.4}
+.card.dropbefore::before,.card.dropafter::after{content:"";position:absolute;left:10px;right:10px;height:4px;border-radius:2px;background:var(--accent)}
+.card.dropbefore::before{top:-8px}
+.card.dropafter::after{bottom:-8px}
+.list.dropend{outline:2px dashed var(--accent);outline-offset:4px;border-radius:16px;min-height:60px}
+.sd.dropday,.chip.dropday{background:var(--accent-bg);box-shadow:0 0 0 2px var(--accent)}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--fg);color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
+#toast.show{opacity:1}
+@media (max-width:900px){.menu{display:none}.logo{margin-right:0}}
+@media (max-width:1100px){
+  .app{grid-template-columns:minmax(360px,1fr) minmax(0,42%)}
+  .side{display:none}.chips{display:flex}
+}
+@media (max-width:760px){
+  body{overflow:auto}
+  .hdr{position:sticky;top:0;padding:0 16px}
+  .app{flex:none;grid-template-columns:1fr;grid-template-rows:auto auto auto}
+  .rail{display:contents}
+  .map{order:-1;position:sticky;top:68px;z-index:4;height:38vh;flex:none;margin:8px 12px}
+  .recs{order:1;margin:0 12px 90px;overflow:visible}
+  .main{display:block;height:auto;overflow:visible}
+  .scrollwrap{overflow:visible}
+  .scroll{padding:4px 16px 0}
+  .head{padding:18px 16px 0}
+  .addbar{position:sticky;bottom:0;padding:12px 16px 16px}
+  .card{flex-direction:column-reverse}
+  .ph{width:100%;min-height:150px;align-self:auto}
+}
+</style>
+
+</head>
+<body>
+<header class="hdr">
+ <div class="logo"><span class="lg"><i data-lucide="compass" class="i" aria-hidden="true"></i></span>travelApp</div>
+ <nav class="menu" aria-label="Main"><button class="mi on">My trips</button><button class="mi">Discover</button><button class="mi">Bookings</button><button class="mi">Inspiration</button></nav>
+ <span class="grow"></span>
+ <button class="ib" aria-label="Search"><i data-lucide="search" class="i" aria-hidden="true"></i></button>
+ <button class="ib" aria-label="Notifications"><i data-lucide="bell" class="i" aria-hidden="true"></i><span class="dot"></span></button>
+ <div class="acct">
+  <button class="avb sight" id="avBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="aMenu" aria-label="Account menu">EK</button>
+  <div class="amenu" id="aMenu" role="menu" hidden>
+   <div class="who"><span class="avb sight">EK</span><div><b>Eugen</b><div class="sub">Trip member</div></div></div>
+   <button class="mr" role="menuitem"><i data-lucide="user" class="i" aria-hidden="true"></i>Profile</button>
+   <button class="mr" role="menuitem"><i data-lucide="settings" class="i" aria-hidden="true"></i>Account settings</button>
+   <button class="mr" role="menuitem"><i data-lucide="bell" class="i" aria-hidden="true"></i>Notifications</button>
+   <button class="mr" role="menuitem"><i data-lucide="languages" class="i" aria-hidden="true"></i>Language and currency<span class="sub">English · VND</span></button>
+   <button class="mr" role="menuitem"><i data-lucide="circle-help" class="i" aria-hidden="true"></i>Help</button>
+   <div class="ahr"></div>
+   <button class="mr" role="menuitem"><i data-lucide="log-out" class="i" aria-hidden="true"></i>Sign out</button>
+  </div>
+ </div>
+</header>
+
+<div class="app">
+ <nav class="side" id="side" aria-label="Trip navigation"></nav>
+ <main class="main">
+  <div class="head" id="head"></div>
+  <div class="scrollwrap" id="sw"><div class="scroll" id="scroll"></div>
+  <div class="addbar"><label class="addi" for="addIn"><i data-lucide="map-pin" class="i" aria-hidden="true"></i><input id="addIn" type="text" placeholder="Add a place for this day" autocomplete="off"></label><button class="btn" id="addBtn">Add</button></div></div>
+ </main>
+ <aside class="rail">
+  <section class="map" id="map" aria-label="Map of the planned stops"></section>
+  <section class="recs" id="recs" aria-label="Recommendations"></section>
+ </aside>
+</div>
+
+<div id="toast" role="status"></div>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>
+var CITIES=[
+ {name:'Ho Chi Minh City',kind:'img',W:1498,H:1142,ppk:258,zoomW:420,center:[700,420]},
+ {name:'Da Nang',kind:'art',W:1000,H:760,ppk:100,zoomW:300,center:[520,330]}
+];
+var DOWS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var MONL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var PEOPLE={EL:{n:'Elli',c:'shop'},MV:{n:'Marvin',c:'food'},EK:{n:'Eugen',c:'sight'},AI:{n:'AI',c:'ai'}};
+var MODES={walk:{l:'Walk',i:'footprints'},bus:{l:'Bus',i:'bus'},taxi:{l:'Taxi',i:'car'},moto:{l:'Motorbike taxi',i:'bike'}};
+var PH={
+food:'<rect width="120" height="100" fill="#f4d7b5"/><rect y="70" width="120" height="30" fill="#e7b98a"/><path d="M24 54h72a36 30 0 0 1-72 0z" fill="#d9622b"/><ellipse cx="60" cy="54" rx="36" ry="8" fill="#f3dfae"/><circle cx="48" cy="53" r="5" fill="#b8402a"/><circle cx="66" cy="55" r="4" fill="#8bbf5a"/><path d="M46 44q5-8 0-14M60 44q5-8 0-14M74 44q5-8 0-14" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".75"/>',
+shop:'<rect width="120" height="100" fill="#f9d6e4"/><path d="M10 30h100l-8 22H18z" fill="#e0457b"/><path d="M10 30h20l-4 22h-8zM50 30h20l-2 22H52zM90 30h20l-4 22h-12z" fill="#fff" opacity=".85"/><rect x="18" y="52" width="84" height="38" fill="#f3b3cb"/><rect x="28" y="62" width="18" height="28" fill="#c93a6c"/><circle cx="64" cy="72" r="7" fill="#f6c75a"/><circle cx="82" cy="74" r="6" fill="#8bbf5a"/>',
+sight:'<rect width="120" height="100" fill="#d7d5f8"/><path d="M20 38 60 18l40 20z" fill="#6b64c9"/><rect x="26" y="40" width="68" height="6" fill="#8d87e0"/><rect x="30" y="48" width="8" height="30" fill="#f4f3ff"/><rect x="46" y="48" width="8" height="30" fill="#f4f3ff"/><rect x="66" y="48" width="8" height="30" fill="#f4f3ff"/><rect x="82" y="48" width="8" height="30" fill="#f4f3ff"/><rect x="22" y="78" width="76" height="8" fill="#8d87e0"/><rect y="86" width="120" height="14" fill="#b9b5ee"/>',
+church:'<rect width="120" height="100" fill="#f0d8d0"/><rect x="30" y="40" width="60" height="50" fill="#c8553d"/><rect x="22" y="30" width="22" height="60" fill="#b84a34"/><rect x="76" y="30" width="22" height="60" fill="#b84a34"/><path d="M22 30l11-22 11 22zM76 30l11-22 11 22z" fill="#8f3322"/><path d="M52 90V66a8 8 0 0 1 16 0v24z" fill="#f6e3c8"/><circle cx="60" cy="50" r="6" fill="#f6e3c8"/><rect y="90" width="120" height="10" fill="#9aa88c"/>',
+cafe:'<rect width="120" height="100" fill="#f6e5b4"/><rect y="74" width="120" height="26" fill="#d8b878"/><path d="M34 40h44v22a22 18 0 0 1-44 0z" fill="#fff"/><path d="M78 46h8a8 8 0 0 1 0 16h-9" stroke="#fff" stroke-width="5" fill="none"/><ellipse cx="56" cy="40" rx="22" ry="5" fill="#7a4a2a"/><ellipse cx="56" cy="80" rx="34" ry="6" fill="#fff" opacity=".9"/><path d="M48 30q4-7 0-12M60 30q4-7 0-12" stroke="#b78a52" stroke-width="3" fill="none" stroke-linecap="round"/>',
+tower:'<rect width="120" height="100" fill="#bfe0ef"/><circle cx="96" cy="20" r="9" fill="#fbe29a"/><rect x="44" y="14" width="22" height="80" fill="#4f7fae"/><path d="M44 14l11-10 11 10z" fill="#385e86"/><rect x="18" y="52" width="20" height="42" fill="#7ea7c9"/><rect x="72" y="42" width="26" height="52" fill="#6a94bb"/><g fill="#e8f4fb" opacity=".8"><rect x="50" y="26" width="3" height="3"/><rect x="58" y="26" width="3" height="3"/><rect x="50" y="40" width="3" height="3"/><rect x="58" y="40" width="3" height="3"/><rect x="50" y="54" width="3" height="3"/><rect x="58" y="54" width="3" height="3"/></g><rect y="92" width="120" height="8" fill="#5c7f6a"/>',
+beach:'<rect width="120" height="100" fill="#bfe6f6"/><circle cx="88" cy="24" r="11" fill="#fde08a"/><rect y="44" width="120" height="26" fill="#3f9fc7"/><path d="M0 52q15-6 30 0t30 0 30 0 30 0v6H0z" fill="#8fd0e8" opacity=".7"/><path d="M0 68q30-8 60 0t60 0v32H0z" fill="#f3e0b0"/><path d="M30 100l12-26" stroke="#8a5a3a" stroke-width="3"/><path d="M42 74q-14-4-22 6M42 74q12-6 22 2" stroke="#4f9a5a" stroke-width="4" fill="none" stroke-linecap="round"/>',
+bridge:'<rect width="120" height="100" fill="#26335a"/><circle cx="96" cy="18" r="6" fill="#f2e6b8"/><path d="M6 66Q40 14 78 38t36 28" stroke="#f08a3c" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M0 66h120" stroke="#c9b27a" stroke-width="4"/><rect y="72" width="120" height="28" fill="#1b2545"/><path d="M10 80h20M44 86h28M84 80h22" stroke="#f08a3c" stroke-width="2" opacity=".6"/>',
+mountain:'<rect width="120" height="100" fill="#d3ead9"/><circle cx="26" cy="22" r="9" fill="#fbe9a8"/><path d="M0 78 36 30l22 26 20-34 42 56z" fill="#4f9a6c"/><path d="M36 30l-10 16 10-4 8 6z" fill="#e6f3ea" opacity=".8"/><path d="M0 100V80q30-10 60 0t60-4v24z" fill="#3d7f57"/><path d="M62 92V76l8-6 8 6v16z" fill="#c9553d"/><path d="M60 76l10-9 10 9z" fill="#8f3322"/>'
+};
+function photo(k){return '<svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+PH[k]+'</svg>';}
+var ALWAYS={o:'00:00',c:'23:59',label:'Open all day'};
+function lg(m){return {m:m,auto:true,dur:null,time:'',ticket:'',hidden:false};}
+var recView='cards';
+var DAYS=[
+{city:0,date:'2026-05-12',stops:[
+ {c:'shop',i:'store',n:'Ben Thanh Market',desc:'Saigon’s busiest market: coffee, souvenirs and street snacks under one roof. Go early, before the heat.',x:650,y:595,time:'09:00',hours:{o:'06:00',c:'18:00'},cost:0,by:'EL',ph:'shop'},
+ {c:'food',i:'utensils',n:'Pho Hoa Pasteur',desc:'Rich beef broth, soft noodles and rare steak on request. Locals queue at lunch, so come before 12:30.',x:464,y:204,time:'12:00',hours:{o:'06:00',c:'23:00'},cost:120,by:'MV',ph:'food'},
+ {c:'sight',i:'landmark',n:'War Remnants Museum',desc:'Powerful, sobering exhibits on the Vietnam War. Plan about 90 minutes.',x:486,y:398,time:'14:30',hours:{o:'07:30',c:'18:00'},cost:40,by:'EL',ph:'sight'}],
+ legs:[lg('bus'),lg('taxi')],
+ sugg:[
+  {c:'food',i:'utensils',n:'Banh Mi Huynh Hoa',desc:'Famously stuffed banh mi with pate and cold cuts. Expect a short line.',x:438,y:623,time:'16:30',hours:{o:'14:30',c:'23:00'},cost:60,by:'AI',ph:'food'},
+  {c:'sight',i:'landmark',n:'Saigon Opera House',desc:'A French colonial theatre that glows at night. Lovely for a short evening stop.',x:791,y:475,time:'18:00',hours:ALWAYS,cost:0,by:'AI',ph:'sight'}]},
+{city:0,date:'2026-05-13',stops:[
+ {c:'sight',i:'church',n:'Notre-Dame Cathedral',desc:'The 1880 red-brick cathedral at the heart of the city. The outside is still worth a photo.',x:678,y:387,time:'09:00',hours:{o:'08:00',c:'11:00'},shut:'Closed to visitors for restoration',cost:0,by:'EK',ph:'church'},
+ {c:'cafe',i:'coffee',n:'Cafe Apartment',desc:'Nine floors of small cafes in an old apartment block. Pick a balcony seat over Nguyen Hue.',x:828,y:538,time:'11:30',hours:{o:'09:00',c:'22:00'},cost:null,by:'MV',ph:'cafe'},
+ {c:'sight',i:'building-2',n:'Saigon Skydeck',desc:'See the whole city from the 49th floor. Sunset slots sell out first.',x:831,y:621,time:'16:00',hours:{o:'09:30',c:'21:30'},cost:240,resv:{days:14,high:true},by:'EL',ph:'tower'}],
+ legs:[lg('walk'),lg('bus')],
+ sugg:[
+  {c:'sight',i:'mail',n:'Saigon Central Post Office',desc:'A Gothic hall with iron beams by Eiffel’s studio. Still a working post office.',x:704,y:384,time:'10:00',hours:{o:'07:00',c:'19:00'},cost:0,by:'AI',ph:'sight'}]},
+{city:1,date:'2026-05-14',stops:[
+ {c:'nature',i:'waves',n:'My Khe Beach',desc:'A wide, calm beach with soft sand. Best for a swim in the cool of the morning.',x:672,y:360,time:'07:00',hours:ALWAYS,cost:0,by:'EL',ph:'beach'},
+ {c:'food',i:'utensils',n:'Mi Quang 1A',desc:'Turmeric noodles with pork, shrimp and peanuts. The dish Da Nang is known for.',x:520,y:345,time:'11:30',hours:{o:'06:00',c:'21:00'},cost:60,by:'MV',ph:'food'},
+ {c:'sight',i:'landmark',n:'Cham Museum',desc:'The world’s largest collection of Cham sculpture, in a calm, shaded building.',x:378,y:330,time:'14:00',hours:{o:'07:00',c:'17:00'},cost:60,by:'EK',ph:'sight'},
+ {c:'sight',i:'landmark',n:'Dragon Bridge',desc:'The dragon breathes fire and water on weekend nights. Arrive 20 minutes early for a good spot.',x:425,y:205,time:'21:00',hours:{o:'21:00',c:'22:00',only:[6,0],label:'Show Sat and Sun, 21:00',note:'The fire and water show only runs on Saturday and Sunday evenings'},cost:0,by:'MV',ph:'bridge'}],
+ legs:[lg('taxi'),lg('taxi'),lg('taxi')],
+ sugg:[
+  {c:'food',i:'utensils',n:'Banh Xeo Ba Duong',desc:'Crisp turmeric pancakes you wrap in herbs and dip in peanut sauce.',x:545,y:300,time:'18:30',hours:{o:'10:00',c:'21:00'},cost:90,by:'AI',ph:'food'},
+  {c:'nature',i:'mountain',n:'Son Tra Peninsula',desc:'Jungle-covered headland with sea views and wild monkeys. Go early for the best light.',x:800,y:110,time:'06:30',hours:ALWAYS,cost:0,by:'AI',ph:'mountain'}]},
+{city:1,date:'2026-05-15',stops:[
+ {c:'nature',i:'mountain',n:'Marble Mountains',desc:'Five limestone hills with caves, pagodas and big views. Wear shoes with good grip.',x:640,y:650,time:'08:30',hours:{o:'07:00',c:'17:30'},cost:40,by:'EL',ph:'mountain'},
+ {c:'shop',i:'store',n:'Han Market',desc:'A local market for dried fish, fabrics and fresh fruit. Bargain politely and with a smile.',x:445,y:285,time:'13:00',hours:{o:'06:00',c:'19:00'},cost:0,by:'MV',ph:'shop'},
+ {c:'cafe',i:'coffee',n:'Cong Caphe',desc:'Coconut coffee in a retro, communist-era setting. A favorite with the whole group.',x:470,y:250,time:'15:00',hours:{o:'07:00',c:'23:00'},cost:55,by:'EK',ph:'cafe'}],
+ legs:[lg('taxi'),lg('walk')],
+ sugg:[
+  {c:'sight',i:'ship',n:'Han River sunset cruise',desc:'An hour on the water as the bridges light up. Book a seat on the upper deck.',x:410,y:260,time:'18:30',hours:{o:'17:00',c:'21:00'},cost:150,resv:{days:7,high:false},by:'AI',ph:'bridge'},
+  {c:'sight',i:'landmark',n:'Dragon Bridge show',desc:'Fire and water from the dragon’s head. Adding it here shows the weekend-only warning.',x:425,y:205,time:'21:00',hours:{o:'21:00',c:'22:00',only:[6,0],label:'Show Sat and Sun, 21:00',note:'The fire and water show only runs on Saturday and Sunday evenings'},cost:0,by:'AI',ph:'bridge'}]},
+{city:1,date:'2026-05-16',stops:[],legs:[],
+ sugg:[
+  {c:'sight',i:'landmark',n:'Dragon Bridge show',desc:'Fire and water from the dragon’s head, on Saturday nights only.',x:425,y:205,time:'21:00',hours:{o:'21:00',c:'22:00',only:[6,0],label:'Show Sat and Sun, 21:00',note:'The fire and water show only runs on Saturday and Sunday evenings'},cost:0,by:'AI',ph:'bridge'},
+  {c:'food',i:'utensils',n:'Banh Xeo Ba Duong',desc:'Crisp turmeric pancakes you wrap in herbs and dip in peanut sauce.',x:545,y:300,time:'18:30',hours:{o:'10:00',c:'21:00'},cost:90,by:'AI',ph:'food'}]}
+];
+var cur=0,sel=0,zoom=false,openLeg=null,upLeg=null,editTime=null,editCost=null,curV=null,curCity=-1,raf=0;
+function ic(n,c){return '<i data-lucide="'+n+'" class="i '+(c||'')+'" aria-hidden="true"></i>';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function pd(s){var p=s.split('-');return new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));}
+function dow(d){return pd(d.date).getUTCDay();}
+function shortDay(d){var x=pd(d.date);return DOWS[x.getUTCDay()].slice(0,3)+' '+x.getUTCDate()+'/'+(x.getUTCMonth()+1);}
+function longDay(d){var x=pd(d.date);return DOWS[x.getUTCDay()]+', '+x.getUTCDate()+' '+MONL[x.getUTCMonth()];}
+function resvText(d,r){var x=pd(d.date);x.setUTCDate(x.getUTCDate()-r.days);var w=r.days%7===0?(r.days/7)+' weeks':r.days+' days';return (r.high?'High demand · ':'')+'Reservations open '+x.getUTCDate()+' '+MONS[x.getUTCMonth()]+' ('+w+' before)';}
+function check(s,d){
+ var w=dow(d),h=s.hours;
+ if(s.shut)return s.shut;
+ if(!h)return '';
+ if(h.closed&&h.closed.indexOf(w)>-1)return 'Closed on '+DOWS[w]+'s';
+ if(h.only&&h.only.indexOf(w)<0)return h.note;
+ if(s.time<h.o)return 'Opens at '+h.o+', but your start time is '+s.time;
+ if(s.time>=h.c)return 'Closes at '+h.c+', before your start time of '+s.time;
+ return '';
+}
+function costText(s){return s.cost===0?'Free entry':(s.c==='food'?'About ':'Entry ')+s.cost+'k VND'+(s.c==='food'?' each':'');}
+function legInfo(d,li){
+ var a=d.stops[li],b=d.stops[li+1],c=CITIES[d.city],km=Math.max(Math.hypot(a.x-b.x,a.y-b.y)/c.ppk,0.2);
+ return {km:km,t:{walk:Math.round(km*13+1),bus:Math.round(km*4+8),taxi:Math.round(km*2.5+4),moto:Math.round(km*2.2+3)}};
+}
+function bestMode(t){if(t.walk<=12)return 'walk';if(t.bus<=t.taxi+8)return 'bus';return 'taxi';}
+function legMode(d,li){var g=d.legs[li];return g.auto?bestMode(legInfo(d,li).t):g.m;}
+function legMin(d,li){var g=d.legs[li];return g.dur!=null?g.dur:legInfo(d,li).t[legMode(d,li)];}
+function legHtml(di,li){
+ var d=DAYS[di],g=d.legs[li],k=di+'-'+li,open=openLeg===k,inf=legInfo(d,li),m=legMode(d,li),mins=legMin(d,li);
+ var txt=(g.time?g.time+' · ':'')+mins+' min · '+inf.km.toFixed(1)+' km';
+ if(g.hidden)return '<div class="leg"><button class="lt" data-a="show" data-k="'+k+'">'+ic('eye')+'Show directions</button></div>';
+ var h='<div class="leg"><button class="lt'+(open?' open':'')+'" data-a="tog" data-k="'+k+'" aria-expanded="'+open+'" aria-label="Directions: '+MODES[m].l+', '+txt+(g.auto?', chosen by AI':'')+'">'+ic(MODES[m].i)+'<span>'+txt+'</span>'+(g.dur!=null?ic('pencil'):'')+(g.auto?'<span class="aibadge" title="Best option, chosen by AI">'+ic('sparkles')+'</span>':'')+(g.ticket?ic('ticket'):'')+ic('chevron-down')+'</button>';
+ if(open){
+  h+='<div class="pop">';
+  if(g.auto)h+='<div class="pr" style="cursor:default;font-size:12px;color:var(--accent)">'+ic('sparkles')+'Best option, chosen by AI</div>';
+  Object.keys(MODES).forEach(function(mm){h+='<div class="pr'+(mm===m?' sel':'')+'" data-a="mode" data-k="'+k+'" data-m="'+mm+'">'+ic(MODES[mm].i)+MODES[mm].l+'<span class="sub" style="margin-left:auto">'+inf.t[mm]+' min</span>'+(mm===m?ic('check'):'')+'</div>';});
+  if(!g.auto)h+='<div class="pr" data-a="auto" data-k="'+k+'" style="color:var(--accent)">'+ic('sparkles')+'Use the AI choice again</div>';
+  h+='<div class="sep"></div><div class="pr" style="cursor:default">'+ic('timer')+'<label for="du">Travel time</label><input id="du" type="number" min="1" max="600" data-a="dur" data-k="'+k+'" value="'+mins+'" style="width:70px"><span class="sub">min</span></div>';
+  if(g.dur!=null)h+='<div class="pr" data-a="rdur" data-k="'+k+'" style="font-size:12px">'+ic('rotate-ccw')+'Reset to estimated '+inf.t[m]+' min</div>';
+  h+='<div class="pr" style="cursor:default">'+ic('clock')+'<label for="tm">Leave at</label><input id="tm" type="time" data-a="time" data-k="'+k+'" value="'+g.time+'"></div>';
+  h+='<div class="pr" data-a="up" data-k="'+k+'">'+ic('upload')+(g.ticket?'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.ticket)+'</span><span data-a="rmt" data-k="'+k+'" aria-label="Remove ticket">'+ic('x')+'</span>':'Upload ticket')+'</div>';
+  h+='<div class="pr" data-a="hide" data-k="'+k+'">'+ic('eye-off')+'Hide directions</div><div class="sep"></div><div class="pr" style="cursor:default;font-size:12px">Change default for all places</div></div>';
+ }
+ return h+'</div>';
+}
+function chipsHtml(s,d,key){
+ var h='';
+ if(s.hours)h+='<span class="ch">'+ic('clock')+(s.hours.label||'Open '+s.hours.o+' to '+s.hours.c)+'</span>';
+ if(editCost===key)h+='<span class="ch">'+ic('ticket')+'<input data-focus data-a="cost" data-key="'+key+'" type="number" min="0" placeholder="0" aria-label="Cost in thousand VND"> k VND</span>';
+ else if(s.cost==null)h+='<button class="ch ghost" data-a="ecost" data-key="'+key+'">'+ic('plus')+'Add cost</button>';
+ else h+='<button class="ch" data-a="ecost" data-key="'+key+'" title="Edit cost">'+ic('ticket')+costText(s)+'</button>';
+ if(s.resv)h+='<span class="ch '+(s.resv.high?'hot':'amber')+'">'+ic('calendar-clock')+resvText(d,s.resv)+'</span>';
+ return h;
+}
+var CATN={shop:'Shopping',food:'Food',sight:'Sights',cafe:'Cafes',nature:'Nature'};
+function autoTitle(d){
+ if(!d.stops.length)return 'Free day';
+ var n={},o=[];
+ d.stops.forEach(function(s){if(!n[s.c]){n[s.c]=0;o.push(s.c);}n[s.c]++;});
+ o.sort(function(a,b){return n[b]-n[a];});
+ var l=o.slice(0,2).map(function(c){return CATN[c]||'Plans';});
+ return l[0]+(l[1]?' and '+l[1].toLowerCase():'');
+}
+function dayTitle(d){return d.title||autoTitle(d);}
+function side(){
+ var h='<div class="brand">Vietnam with friends</div><div class="brandsub">12 to 19 May</div><div class="sn act">'+ic('layout-list')+'Overview</div><div class="sn">'+ic('compass')+'Explore</div><div class="sn">'+ic('sticky-note')+'Notes</div><div class="sn">'+ic('map-pin')+'Places to visit</div><div class="sh">Itinerary</div>';
+ CITIES.forEach(function(c,ci){
+  h+='<div class="city">'+ic('map-pin')+c.name+'</div>';
+  DAYS.forEach(function(d,i){if(d.city!==ci)return;h+='<div class="sd'+(i===cur?' on':'')+'" data-a="day" data-i="'+i+'">'+shortDay(d)+'<small>'+esc(dayTitle(d))+'</small></div>';});
+ });
+ document.getElementById('side').innerHTML=h;
+}
+function head(){
+ var d=DAYS[cur],tm=0;
+ d.legs.forEach(function(g,li){if(!g.hidden)tm+=legMin(d,li);});
+ var h='<div class="top"><h1 class="h1"><label class="h1wrap"><input id="dayTitle" class="h1in" type="text" value="'+esc(dayTitle(d))+'" placeholder="Name this day" aria-label="Day title" maxlength="40"><span class="tag" title="Suggested by AI" aria-label="Suggested by AI"'+(d.title?' hidden':'')+'>'+ic('sparkles')+'</span></label></h1><span class="pill">'+ic('calendar')+'12 to 19 May</span><span class="grow"></span><span class="avs"><span class="av shop">EL</span><span class="av food">MV</span><span class="av sight">EK</span></span><button class="btn soft">'+ic('user-plus')+'Invite</button></div>';
+ h+='<div class="chips">';
+ CITIES.forEach(function(c,ci){h+='<span class="cl">'+c.name+'</span>';DAYS.forEach(function(x,i){if(x.city===ci)h+='<button class="chip'+(i===cur?' on':'')+'" data-a="day" data-i="'+i+'">'+shortDay(x)+'</button>';});});
+ h+='</div><div class="dh"><div><span class="dcity">'+ic('map-pin')+CITIES[d.city].name+'</span><h2>'+longDay(d)+'</h2></div>';
+ h+=d.stops.length>1?'<span class="lnk">'+ic('route')+'About '+tm+' min of travel</span>':'<span class="lnk">'+ic('wand-sparkles')+'Plan this day with AI</span>';
+ h+='</div>';
+ document.getElementById('head').innerHTML=h;
+}
+function cardHtml(s,i,d){
+ var key=cur+':'+i,w=check(s,d),tm=editTime===key?'<span class="when">'+ic('clock')+'<input data-focus data-a="stime" data-key="'+key+'" type="time" value="'+s.time+'" aria-label="Start time"></span>':'<button class="when" data-a="etime" data-key="'+key+'" title="Change start time">'+ic('clock')+s.time+'</button>';
+ return '<div class="card'+(i===sel?' on':'')+'" tabindex="0" draggable="true" data-drag="stop" data-a="stop" data-i="'+i+'"><div class="body"><div class="row">'+tm+'<span class="grip" title="Drag to reorder" aria-hidden="true">'+ic('grip-vertical')+'</span></div><div class="t"><span class="ic '+s.c+'">'+ic(s.i)+'</span>'+esc(s.n)+'</div><div class="d">'+esc(s.desc)+'</div><div class="chs">'+chipsHtml(s,d,key)+'</div>'+(w?'<div class="warnbar">'+ic('triangle-alert')+'<span><b>Heads up:</b> '+w+'. Pick another day or time?</span></div>':'')+'</div><div class="ph">'+photo(s.ph)+'</div></div>';
+}
+function scrollHtml(){
+ var d=DAYS[cur],h='<div class="list">';
+ d.stops.forEach(function(s,i){h+=cardHtml(s,i,d);if(i<d.stops.length-1)h+=legHtml(cur,i);});
+ if(!d.stops.length)h+='<div class="empty"><b>Nothing planned yet.</b><br>Add a place below, or pick one of the AI recommendations on the right.</div>';
+ h+='</div>';
+ document.getElementById('scroll').innerHTML=h;
+ h='';
+ if(d.sugg.length){
+  h+='<div class="rh"><div class="sg"><h3>'+ic('sparkles')+'Recommended for you</h3><div class="sub">AI picks for this day. Tap Add, or drag one into the plan.</div></div><div class="seg" role="group" aria-label="Layout"><button data-a="rv" data-v="cards" class="'+(recView==='cards'?'on':'')+'" aria-pressed="'+(recView==='cards')+'">'+ic('layout-grid')+'Cards</button><button data-a="rv" data-v="list" class="'+(recView==='list'?'on':'')+'" aria-pressed="'+(recView==='list')+'">'+ic('list')+'List</button></div></div>';
+  h+=recView==='cards'?'<div class="rcs'+(d.sugg.length===1?' one':'')+'">':'<div class="rl">';
+  d.sugg.forEach(function(s,i){
+   var tmp={c:s.c,time:s.time,hours:s.hours,shut:s.shut},w=check(tmp,d);
+   var hc=w?'<span class="ch amber">'+ic('triangle-alert')+w+'</span>':'<span class="ch">'+ic('clock')+(s.hours.label||'Open '+s.hours.o+' to '+s.hours.c)+'</span>';
+   var cc='<span class="ch">'+ic('ticket')+costText(s)+'</span>';
+   if(recView==='cards'){
+    h+='<div class="rc" draggable="true" data-drag="sugg" data-i="'+i+'"><div class="rcp">'+photo(s.ph)+'<span class="rcb">'+ic('sparkles')+'AI pick</span></div><div class="rcn">'+esc(s.n)+'</div><div class="rcd">'+esc(s.desc)+'</div><div class="chs">'+hc+cc+'</div><button class="btn rca" data-a="addsug" data-i="'+i+'">'+ic('plus')+'Add to day</button></div>';
+   }else{
+    h+='<div class="sr" draggable="true" data-drag="sugg" data-i="'+i+'"><div class="ph">'+photo(s.ph)+'</div><div class="srt"><div class="nm">'+esc(s.n)+'</div><div class="ds">'+esc(s.desc)+'</div><div class="chs">'+hc+cc+'</div></div><button class="btn soft" data-a="addsug" data-i="'+i+'" aria-label="Add '+esc(s.n)+'">'+ic('plus')+'Add</button></div>';
+   }
+  });
+  h+='</div>';
+ }
+ document.getElementById('recs').innerHTML=h||'<div class="sg"><h3>'+ic('sparkles')+'Recommended for you</h3><div class="sub">No more AI picks for this day. Check back after you add a few places.</div></div>';
+}
+function artDaNang(){
+ var s='<rect width="1000" height="760" fill="var(--land)"/>',g='',y,x;
+ for(y=90;y<=720;y+=70)g+='M0 '+y+'L690 '+(y-8)+' ';
+ for(x=60;x<=640;x+=70)g+='M'+x+' 0L'+(x+12)+' 760 ';
+ s+='<path d="'+g+'" stroke="var(--roadline)" stroke-width="3" fill="none"/><path d="M0 300L700 290M500 0L520 760M0 520L700 500" stroke="var(--road)" stroke-width="9" fill="none"/>';
+ s+='<path d="M722 0L1000 0L1000 760L772 760C742 600 702 450 692 300C686 200 704 100 722 0Z" fill="var(--sea)"/><path d="M722 0C704 100 686 200 692 300C702 450 742 600 772 760" stroke="var(--sand)" stroke-width="16" fill="none"/>';
+ s+='<path d="M600 0L1000 0L1000 170C900 200 800 160 730 118C670 84 624 50 600 0Z" fill="var(--park)"/>';
+ s+='<path d="M290 760C330 560 390 420 405 300C415 220 430 140 520 40L560 0" stroke="var(--sea)" stroke-width="28" fill="none" stroke-linecap="round"/>';
+ s+='<path d="M386 205L446 205" stroke="var(--road)" stroke-width="9"/><circle cx="640" cy="650" r="34" fill="var(--park)"/><circle cx="676" cy="676" r="18" fill="var(--park)"/>';
+ s+='<g font-family="Inter,sans-serif" font-size="20" font-weight="600" letter-spacing="3" fill="var(--lbl)"><text x="780" y="420">EAST SEA</text><text x="780" y="70">SON TRA</text><text x="560" y="720" text-anchor="end">MARBLE MTS</text><text x="640" y="460" text-anchor="end">MY KHE BEACH</text><text transform="translate(330 560) rotate(-78)">HAN RIVER</text></g>';
+ return s;
+}
+function viewFor(d,c,cw,ch){
+ var asp=cw/ch,w,h,cx,cy,st=d.stops;
+ if(zoom&&st[sel]){w=c.zoomW;cx=st[sel].x;cy=st[sel].y;}
+ else if(!st.length){w=c.W*0.8;cx=c.center[0];cy=c.center[1];}
+ else{
+  var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,pad=c.W*0.09;
+  st.forEach(function(s){x0=Math.min(x0,s.x);x1=Math.max(x1,s.x);y0=Math.min(y0,s.y);y1=Math.max(y1,s.y);});
+  w=Math.max(x1-x0+2*pad,(y1-y0+2*pad)*asp,c.W*0.22);cx=(x0+x1)/2;cy=(y0+y1)/2;
+ }
+ h=w/asp;
+ if(h>c.H){h=c.H;w=h*asp;}
+ if(w>c.W){w=c.W;h=w/asp;}
+ return {x:Math.min(Math.max(cx-w/2,0),c.W-w),y:Math.min(Math.max(cy-h/2,0),c.H-h),w:w,h:h};
+}
+function applyView(v){
+ curV=v;
+ var el=document.getElementById('map'),svg=el.querySelector('svg.mapimg');
+ if(!svg)return;
+ svg.setAttribute('viewBox',v.x+' '+v.y+' '+v.w+' '+v.h);
+ el.querySelectorAll('.pin').forEach(function(p){
+  var l=(p.dataset.x-v.x)/v.w*100,t=(p.dataset.y-v.y)/v.h*100;
+  p.style.left=l+'%';p.style.top=t+'%';
+  p.style.visibility=(l<-4||l>104||t<-4||t>104)?'hidden':'visible';
+ });
+}
+function tween(a,b){
+ cancelAnimationFrame(raf);
+ var t0=performance.now(),dur=420,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduce){applyView(b);return;}
+ (function step(now){
+  var k=Math.min((now-t0)/dur,1);k=1-Math.pow(1-k,3);
+  applyView({x:a.x+(b.x-a.x)*k,y:a.y+(b.y-a.y)*k,w:a.w+(b.w-a.w)*k,h:a.h+(b.h-a.h)*k});
+  if(k<1)raf=requestAnimationFrame(step);
+ })(t0);
+}
+function mapBuild(animate){
+ var el=document.getElementById('map'),r=el.getBoundingClientRect();
+ if(r.width<10||r.height<10)return;
+ var d=DAYS[cur],c=CITIES[d.city],tv=viewFor(d,c,r.width,r.height);
+ var from=(animate&&curCity===d.city&&curV)?curV:tv;
+ var m='<svg class="mapimg" viewBox="0 0 '+c.W+' '+c.H+'" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Map of '+c.name+'">'+(c.kind==='img'?'<image href="map.webp" x="0" y="0" width="'+c.W+'" height="'+c.H+'"/>':artDaNang());
+ if(d.stops.length>1){var pts=d.stops.map(function(s){return s.x+','+s.y;}).join(' ');
+  m+='<polyline points="'+pts+'" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><polyline points="'+pts+'" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 7" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>';}
+ m+='</svg>';
+ d.stops.forEach(function(s,i){m+='<div class="pin '+s.c+(i===sel?' on':'')+'" data-a="stop" data-i="'+i+'" data-x="'+s.x+'" data-y="'+s.y+'" role="button" tabindex="0" aria-label="'+esc(s.n)+'">'+ic(s.i)+(i===sel?'<span class="pl">'+esc(s.n)+'</span>':'')+'</div>';});
+ m+='<div class="mtop"><span class="mcity">'+ic('map-pin')+c.name+'</span>'+(zoom?'<button class="btn" data-a="all">'+ic('scan')+'Show all stops</button>':'')+'</div>';
+ var tm2=0;d.legs.forEach(function(g,li){if(!g.hidden)tm2+=legMin(d,li);});
+ m+='<span class="mday">'+ic('route')+d.stops.length+(d.stops.length===1?' place':' places')+(tm2?' · '+tm2+' min travel':'')+'</span><span class="mtag">'+(c.kind==='img'?'Map preview':'Illustrated map')+'</span>';
+ el.innerHTML=m;
+ curCity=d.city;
+ applyView(from);
+ if(animate&&from!==tv)tween(from,tv);else if(!animate)applyView(tv);
+}
+function render(){
+ var sc=document.getElementById('sw'),st=sc?sc.scrollTop:0;
+ side();head();scrollHtml();mapBuild(true);
+ document.getElementById('sw').scrollTop=st;
+ if(window.lucide)lucide.createIcons();
+ var f=document.querySelector('[data-focus]');if(f)f.focus();
+}
+function pushStop(s){
+ var d=DAYS[cur];
+ d.stops.push(s);if(d.stops.length>1)d.legs.push(lg('taxi'));
+ sel=d.stops.length-1;zoom=true;
+}
+var app=document.querySelector('.app');
+app.addEventListener('click',function(e){
+ var t=e.target.closest('[data-a]');if(!t)return;
+ var a=t.dataset.a,k=t.dataset.k,d=DAYS[cur],g=k?DAYS[+k.split('-')[0]].legs[+k.split('-')[1]]:null;
+ if(a==='time'||a==='stime'||a==='cost'||a==='dur')return;
+ if(a!=='etime'&&a!=='ecost'){editTime=null;editCost=null;}
+ if(a==='day'){cur=+t.dataset.i;sel=0;zoom=false;openLeg=null;}
+ else if(a==='stop'){if(e.target.closest('[data-a="etime"],[data-a="ecost"]'))return;sel=+t.dataset.i;zoom=true;openLeg=null;}
+ else if(a==='all'){zoom=false;}
+ else if(a==='rv'){recView=t.dataset.v;}
+ else if(a==='etime'){e.stopPropagation();editTime=t.dataset.key;editCost=null;}
+ else if(a==='ecost'){e.stopPropagation();editCost=t.dataset.key;editTime=null;}
+ else if(a==='tog'){openLeg=openLeg===k?null:k;}
+ else if(a==='mode'){g.m=t.dataset.m;g.auto=false;g.dur=null;}
+ else if(a==='auto'){g.auto=true;g.dur=null;}
+ else if(a==='rdur'){g.dur=null;}
+ else if(a==='hide'){g.hidden=true;openLeg=null;}
+ else if(a==='show'){g.hidden=false;}
+ else if(a==='rmt'){g.ticket='';e.stopPropagation();}
+ else if(a==='up'){upLeg=g;document.getElementById('fileIn').click();return;}
+ else if(a==='addsug'){var s=d.sugg.splice(+t.dataset.i,1)[0];pushStop(JSON.parse(JSON.stringify(s)));}
+ render();
+});
+app.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&(e.target.classList.contains('pin')||e.target.classList.contains('card'))){e.preventDefault();e.target.click();}});
+app.addEventListener('change',function(e){
+ var t=e.target,a=t.dataset&&t.dataset.a;if(!a)return;
+ if(a==='time'){var k=t.dataset.k.split('-');DAYS[+k[0]].legs[+k[1]].time=t.value;render();}
+ else if(a==='dur'){var kk=t.dataset.k.split('-');DAYS[+kk[0]].legs[+kk[1]].dur=t.value===''?null:Math.max(1,Math.round(+t.value));render();}
+ else if(a==='stime'){var p=t.dataset.key.split(':');if(t.value)DAYS[+p[0]].stops[+p[1]].time=t.value;editTime=null;render();}
+ else if(a==='cost'){var q=t.dataset.key.split(':');DAYS[+q[0]].stops[+q[1]].cost=t.value===''?null:Math.max(0,+t.value);editCost=null;render();}
+});
+function addPlace(){
+ var inp=document.getElementById('addIn'),name=inp.value.trim();
+ if(!name)return;
+ var c=CITIES[DAYS[cur].city];
+ pushStop({c:'sight',i:'map-pin',n:name,desc:'Added just now. Tell the group why it’s worth a stop.',x:c.center[0]+(Math.random()-0.5)*c.W*0.2,y:c.center[1]+(Math.random()-0.5)*c.H*0.2,time:'12:00',hours:null,cost:null,by:'EK',ph:'sight'});
+ inp.value='';render();
+ var sc=document.getElementById('sw');sc.scrollTop=sc.scrollHeight;
+}
+document.getElementById('addBtn').addEventListener('click',addPlace);
+document.getElementById('addIn').addEventListener('keydown',function(e){if(e.key==='Enter')addPlace();});
+var fi=document.createElement('input');fi.type='file';fi.id='fileIn';fi.hidden=true;document.body.appendChild(fi);
+fi.addEventListener('change',function(e){if(e.target.files[0]&&upLeg){upLeg.ticket=e.target.files[0].name;e.target.value='';render();}});
+var drag=null;
+function clearDrop(){document.querySelectorAll('.dropbefore,.dropafter,.dropday,.dropend').forEach(function(e){e.classList.remove('dropbefore','dropafter','dropday','dropend');});}
+function normLegs(d){var n=Math.max(0,d.stops.length-1);while(d.legs.length>n)d.legs.pop();while(d.legs.length<n)d.legs.push(lg('taxi'));}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('show');},2400);}
+function dropTarget(e){
+ var card=e.target.closest('.card'),day=e.target.closest('[data-a="day"]'),sc=e.target.closest('#sw');
+ return {card:card,day:day,sc:sc,ok:!!(card||day||sc)};
+}
+app.addEventListener('dragstart',function(e){
+ var el=e.target.closest&&e.target.closest('[data-drag]');if(!el)return;
+ drag={kind:el.dataset.drag,i:+el.dataset.i};
+ e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',el.dataset.i);}catch(x){}
+ setTimeout(function(){el.classList.add('dragging');},0);
+});
+app.addEventListener('dragend',function(){drag=null;clearDrop();document.querySelectorAll('.dragging').forEach(function(e){e.classList.remove('dragging');});});
+app.addEventListener('dragover',function(e){
+ if(!drag)return;
+ var t=dropTarget(e);if(!t.ok)return;
+ if(t.day&&DAYS[+t.day.dataset.i].city!==DAYS[cur].city){clearDrop();return;}
+ e.preventDefault();clearDrop();
+ if(t.day){t.day.classList.add('dropday');return;}
+ if(t.card){var r=t.card.getBoundingClientRect();t.card.classList.add(e.clientY<r.top+r.height/2?'dropbefore':'dropafter');return;}
+ var cs=document.querySelectorAll('#scroll .card');
+ if(cs.length)cs[cs.length-1].classList.add('dropafter');else{var l=document.querySelector('#scroll .list');if(l)l.classList.add('dropend');}
+});
+app.addEventListener('drop',function(e){
+ if(!drag)return;
+ var t=dropTarget(e);if(!t.ok)return;
+ e.preventDefault();
+ var d=DAYS[cur],td=cur,idx;
+ if(t.day){td=+t.day.dataset.i;if(DAYS[td].city!==d.city){toast('That day is in another city');drag=null;clearDrop();return;}idx=DAYS[td].stops.length;}
+ else if(t.card){var r=t.card.getBoundingClientRect();idx=+t.card.dataset.i+(e.clientY<r.top+r.height/2?0:1);}
+ else idx=d.stops.length;
+ var item;
+ if(drag.kind==='stop'){item=d.stops.splice(drag.i,1)[0];if(td===cur&&idx>drag.i)idx--;}
+ else item=d.sugg.splice(drag.i,1)[0];
+ DAYS[td].stops.splice(idx,0,item);
+ normLegs(d);normLegs(DAYS[td]);
+ if(td===cur){sel=idx;zoom=true;}
+ else{sel=Math.max(0,Math.min(sel,d.stops.length-1));toast('Moved '+item.n+' to '+shortDay(DAYS[td]));}
+ drag=null;clearDrop();openLeg=null;render();
+});
+app.addEventListener('input',function(e){
+ var t=e.target;if(t.id!=='dayTitle')return;
+ var d=DAYS[cur],v=t.value.trim();
+ d.title=(v===''||v===autoTitle(d))?'':v;
+ t.classList.toggle('auto',!d.title);
+ var tag=t.parentNode.querySelector('.tag');if(tag)tag.hidden=!!d.title;
+ var sm=document.querySelector('.sd[data-i="'+cur+'"] small');if(sm)sm.textContent=dayTitle(d);
+});
+app.addEventListener('change',function(e){if(e.target.id==='dayTitle')render();});
+app.addEventListener('keydown',function(e){if(e.target.id==='dayTitle'&&e.key==='Enter')e.target.blur();});
+var avBtn=document.getElementById('avBtn'),aMenu=document.getElementById('aMenu');
+function setMenu(o){aMenu.hidden=!o;avBtn.setAttribute('aria-expanded',o?'true':'false');}
+avBtn.addEventListener('click',function(e){e.stopPropagation();setMenu(aMenu.hidden);});
+document.addEventListener('click',function(e){if(!aMenu.hidden&&!aMenu.contains(e.target))setMenu(false);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!aMenu.hidden){setMenu(false);avBtn.focus();}});
+window.addEventListener('resize',function(){mapBuild(false);if(window.lucide)lucide.createIcons();});
+render();
+</script>
+</body>
+</html>
